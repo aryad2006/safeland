@@ -1,0 +1,256 @@
+const { expect } = require("chai");
+const { ethers, upgrades } = require("hardhat");
+
+describe("SafeLandNFT", function () {
+  let nft;
+  let admin, agent, notary, justice, owner1, owner2;
+
+  const AGENT_ROLE = ethers.keccak256(ethers.toUtf8Bytes("AGENT_ROLE"));
+  const NOTARY_ROLE = ethers.keccak256(ethers.toUtf8Bytes("NOTARY_ROLE"));
+  const JUSTICE_ROLE = ethers.keccak256(ethers.toUtf8Bytes("JUSTICE_ROLE"));
+
+  beforeEach(async function () {
+    [admin, agent, notary, justice, owner1, owner2] = await ethers.getSigners();
+
+    const SafeLandNFT = await ethers.getContractFactory("SafeLandNFT");
+    nft = await upgrades.deployProxy(SafeLandNFT, [admin.address], { initializer: "initialize" });
+    await nft.waitForDeployment();
+
+    await nft.connect(admin).grantRole(AGENT_ROLE, agent.address);
+    await nft.connect(admin).grantRole(NOTARY_ROLE, notary.address);
+    await nft.connect(admin).grantRole(JUSTICE_ROLE, justice.address);
+  });
+
+  // ─── Helpers ────────────────────────────────────────────
+  async function createDefaultProperty(ownerAddr) {
+    const docHash = ethers.keccak256(ethers.toUtf8Bytes("doc-12345"));
+    const tx = await nft.connect(agent).createProperty(
+      ownerAddr || owner1.address,
+      "12345/R",
+      "villa",
+      250,
+      "Casablanca",
+      "Anfa",
+      33573100,
+      -7589800,
+      "ipfs://QmTest123",
+      docHash
+    );
+    return tx;
+  }
+
+  // ─── Tests Création ─────────────────────────────────────
+  describe("Création de propriété", function () {
+    it("devrait créer un NFT foncier avec les bonnes métadonnées", async function () {
+      await createDefaultProperty();
+
+      const prop = await nft.getProperty(1);
+      expect(prop.titreFoncier).to.equal("12345/R");
+      expect(prop.propertyType).to.equal("villa");
+      expect(prop.surface).to.equal(250);
+      expect(prop.city).to.equal("Casablanca");
+      expect(prop.isActive).to.be.true;
+      expect(await nft.ownerOf(1)).to.equal(owner1.address);
+    });
+
+    it("devrait émettre l'événement PropertyCreated", async function () {
+      const docHash = ethers.keccak256(ethers.toUtf8Bytes("doc-12345"));
+      await expect(
+        nft.connect(agent).createProperty(
+          owner1.address, "12345/R", "villa", 250,
+          "Casablanca", "Anfa", 33573100, -7589800,
+          "ipfs://QmTest123", docHash
+        )
+      ).to.emit(nft, "PropertyCreated")
+        .withArgs(1, "12345/R", owner1.address, agent.address);
+    });
+
+    it("devrait refuser un titre foncier en double", async function () {
+      await createDefaultProperty();
+      const docHash = ethers.keccak256(ethers.toUtf8Bytes("doc-other"));
+      await expect(
+        nft.connect(agent).createProperty(
+          owner2.address, "12345/R", "terrain", 100,
+          "Rabat", "Agdal", 34020000, -6840000,
+          "ipfs://QmOther", docHash
+        )
+      ).to.be.revertedWith("SafeLand: titre exists");
+    });
+
+    it("devrait refuser si appelé sans le rôle AGENT", async function () {
+      const docHash = ethers.keccak256(ethers.toUtf8Bytes("doc"));
+      await expect(
+        nft.connect(owner1).createProperty(
+          owner1.address, "999/R", "villa", 100,
+          "Fes", "Medina", 0, 0, "ipfs://x", docHash
+        )
+      ).to.be.reverted;
+    });
+
+    it("devrait enregistrer l'historique de création", async function () {
+      await createDefaultProperty();
+      const history = await nft.getHistory(1);
+      expect(history.length).to.equal(1);
+      expect(history[0].txType).to.equal("creation");
+      expect(history[0].from).to.equal(ethers.ZeroAddress);
+      expect(history[0].to).to.equal(owner1.address);
+    });
+
+    it("devrait retrouver un token par titre foncier", async function () {
+      await createDefaultProperty();
+      const tokenId = await nft.findByTitreFoncier("12345/R");
+      expect(tokenId).to.equal(1);
+    });
+  });
+
+  // ─── Tests Transfert ────────────────────────────────────
+  describe("Transfert de propriété", function () {
+    beforeEach(async function () {
+      await createDefaultProperty();
+    });
+
+    it("devrait transférer le NFT au nouveau propriétaire", async function () {
+      const docHash = ethers.keccak256(ethers.toUtf8Bytes("vente-2026"));
+      await nft.connect(agent).transferProperty(
+        1, owner2.address, "sale", docHash, notary.address
+      );
+      expect(await nft.ownerOf(1)).to.equal(owner2.address);
+    });
+
+    it("devrait enregistrer l'historique de transfert", async function () {
+      const docHash = ethers.keccak256(ethers.toUtf8Bytes("vente-2026"));
+      await nft.connect(agent).transferProperty(
+        1, owner2.address, "sale", docHash, notary.address
+      );
+      const history = await nft.getHistory(1);
+      expect(history.length).to.equal(2);
+      expect(history[1].txType).to.equal("sale");
+      expect(history[1].notary).to.equal(notary.address);
+    });
+
+    it("devrait refuser le transfert si verrouillé", async function () {
+      await nft.connect(owner1).lockTransfer(1, "travel_lock");
+      const docHash = ethers.keccak256(ethers.toUtf8Bytes("vente"));
+      await expect(
+        nft.connect(agent).transferProperty(1, owner2.address, "sale", docHash, notary.address)
+      ).to.be.revertedWith("SafeLand: transfer locked");
+    });
+  });
+
+  // ─── Tests Travel Lock ──────────────────────────────────
+  describe("Travel Lock / Safe-Lock", function () {
+    beforeEach(async function () {
+      await createDefaultProperty();
+    });
+
+    it("le propriétaire devrait pouvoir verrouiller son titre", async function () {
+      await nft.connect(owner1).lockTransfer(1, "travel_lock");
+      expect(await nft.isLocked(1)).to.be.true;
+      expect(await nft.canTransfer(1)).to.be.false;
+    });
+
+    it("le propriétaire devrait pouvoir déverrouiller son titre", async function () {
+      await nft.connect(owner1).lockTransfer(1, "travel_lock");
+      await nft.connect(owner1).unlockTransfer(1);
+      expect(await nft.isLocked(1)).to.be.false;
+      expect(await nft.canTransfer(1)).to.be.true;
+    });
+
+    it("l'admin devrait pouvoir verrouiller (Panic Button)", async function () {
+      await nft.connect(admin).lockTransfer(1, "panic_button");
+      expect(await nft.isLocked(1)).to.be.true;
+    });
+
+    it("un tiers ne devrait pas pouvoir verrouiller", async function () {
+      await expect(
+        nft.connect(owner2).lockTransfer(1, "malicious")
+      ).to.be.revertedWith("SafeLand: not owner or admin");
+    });
+  });
+
+  // ─── Tests Charges / Hypothèques ────────────────────────
+  describe("Charges et hypothèques", function () {
+    beforeEach(async function () {
+      await createDefaultProperty();
+    });
+
+    it("devrait ajouter une hypothèque et verrouiller le transfert", async function () {
+      await nft.connect(agent).addEncumbrance(
+        1, "hypotheque", notary.address, ethers.parseEther("500000"), 0
+      );
+      const encs = await nft.getEncumbrances(1);
+      expect(encs.length).to.equal(1);
+      expect(encs[0].encType).to.equal("hypotheque");
+      expect(await nft.canTransfer(1)).to.be.false;
+    });
+
+    it("devrait déverrouiller après mainlevée", async function () {
+      await nft.connect(agent).addEncumbrance(
+        1, "hypotheque", notary.address, ethers.parseEther("500000"), 0
+      );
+      await nft.connect(agent).removeEncumbrance(1, 0);
+      expect(await nft.canTransfer(1)).to.be.true;
+    });
+  });
+
+  // ─── Tests Justice Override ─────────────────────────────
+  describe("Justice Override (Burn & Remint)", function () {
+    beforeEach(async function () {
+      await createDefaultProperty();
+    });
+
+    it("devrait geler un titre par ordre judiciaire", async function () {
+      const judgmentHash = ethers.keccak256(ethers.toUtf8Bytes("jugement-2026-001"));
+      await nft.connect(justice).freezeByJustice(1, judgmentHash);
+      expect(await nft.isFrozenByJustice(1)).to.be.true;
+      expect(await nft.canTransfer(1)).to.be.false;
+    });
+
+    it("devrait burn & remint vers le propriétaire légitime", async function () {
+      const judgmentHash = ethers.keccak256(ethers.toUtf8Bytes("jugement-2026-001"));
+      await nft.connect(justice).justiceOverride(
+        1, owner2.address, judgmentHash, "ipfs://QmNewUri"
+      );
+
+      // Le nouveau propriétaire est owner2
+      expect(await nft.ownerOf(1)).to.equal(owner2.address);
+
+      // Les données de propriété sont préservées
+      const prop = await nft.getProperty(1);
+      expect(prop.titreFoncier).to.equal("12345/R");
+
+      // L'historique contient l'override
+      const history = await nft.getHistory(1);
+      const lastEntry = history[history.length - 1];
+      expect(lastEntry.txType).to.equal("justice_override");
+    });
+
+    it("devrait refuser un override sans le rôle JUSTICE", async function () {
+      const hash = ethers.keccak256(ethers.toUtf8Bytes("fake"));
+      await expect(
+        nft.connect(agent).justiceOverride(1, owner2.address, hash, "ipfs://x")
+      ).to.be.reverted;
+    });
+  });
+
+  // ─── Tests Pause (Panic Button) ─────────────────────────
+  describe("Pause globale (Panic Button)", function () {
+    it("devrait bloquer les créations quand en pause", async function () {
+      await nft.connect(admin).pause();
+      const docHash = ethers.keccak256(ethers.toUtf8Bytes("doc"));
+      await expect(
+        nft.connect(agent).createProperty(
+          owner1.address, "999/R", "villa", 100,
+          "Rabat", "Agdal", 0, 0, "ipfs://x", docHash
+        )
+      ).to.be.reverted;
+    });
+
+    it("devrait reprendre après unpause", async function () {
+      await nft.connect(admin).pause();
+      await nft.connect(admin).unpause();
+      await createDefaultProperty();
+      expect(await nft.totalMinted()).to.equal(1);
+    });
+  });
+});

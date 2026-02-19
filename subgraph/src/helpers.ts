@@ -1,5 +1,5 @@
 import { BigInt, Bytes } from "@graphprotocol/graph-ts";
-import { GlobalStat } from "../../generated/schema";
+import { GlobalStat } from "../generated/schema";
 
 export const GLOBAL_STAT_ID = "global";
 

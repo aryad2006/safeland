@@ -1,0 +1,181 @@
+# ─────────────────────────────────────────────
+# SafeLand Subgraph — GraphQL Schema
+# ─────────────────────────────────────────────
+
+# ── Property (NFT) ──────────────────────────
+
+type Property @entity {
+  id: ID!                         # tokenId
+  titreFoncier: String!
+  owner: Bytes!
+  validator: Bytes!
+  frozen: Boolean!
+  locked: Boolean!
+  burned: Boolean!
+  lockReason: String
+  judgmentHash: Bytes
+  encumbrances: [Encumbrance!]! @derivedFrom(field: "property")
+  transfers: [PropertyTransfer!]! @derivedFrom(field: "property")
+  escrowDeals: [EscrowDeal!]! @derivedFrom(field: "property")
+  successionDossiers: [SuccessionDossier!]! @derivedFrom(field: "property")
+  justiceActions: [JusticeAction!]! @derivedFrom(field: "property")
+  city: String
+  propertyType: String
+  createdAt: BigInt!
+  createdTx: Bytes!
+}
+
+type Encumbrance @entity {
+  id: ID!                         # tokenId-index
+  property: Property!
+  encType: String!
+  creditor: Bytes!
+  addedAt: BigInt!
+  removedAt: BigInt
+  active: Boolean!
+}
+
+type PropertyTransfer @entity {
+  id: ID!                         # tx hash - log index
+  property: Property!
+  from: Bytes!
+  to: Bytes!
+  txType: String!
+  timestamp: BigInt!
+  txHash: Bytes!
+}
+
+# ── Registry ────────────────────────────────
+
+type RegistryEntry @entity {
+  id: ID!                         # tokenId
+  tokenId: BigInt!
+  city: String!
+  propertyType: String!
+  owner: Bytes!
+  registeredAt: BigInt!
+}
+
+type RegistryTransaction @entity {
+  id: ID!                         # tx hash - log index
+  tokenId: BigInt!
+  from: Bytes!
+  to: Bytes!
+  txType: String!
+  timestamp: BigInt!
+  txHash: Bytes!
+}
+
+type FraudAlert @entity {
+  id: ID!                         # tx hash - log index
+  tokenId: BigInt!
+  reason: String!
+  timestamp: BigInt!
+  txHash: Bytes!
+}
+
+# ── Escrow ──────────────────────────────────
+
+type EscrowDeal @entity {
+  id: ID!                         # dealId
+  property: Property!
+  tokenId: BigInt!
+  seller: Bytes!
+  buyer: Bytes!
+  price: BigInt!
+  status: String!                 # Created/SellerSigned/BuyerFunded/NotarySigned/Completed/Cancelled
+  cancelReason: String
+  dgiAmount: BigInt
+  ancfccAmount: BigInt
+  sellerNet: BigInt
+  createdAt: BigInt!
+  completedAt: BigInt
+  cancelledAt: BigInt
+  txHash: Bytes!
+}
+
+# ── Fridda (Succession) ────────────────────
+
+type SuccessionDossier @entity {
+  id: ID!                         # dossierId
+  property: Property!
+  nftTokenId: BigInt!
+  deceased: Bytes!
+  finalized: Boolean!
+  heirs: [Bytes!]
+  shares: [BigInt!]
+  proposals: [SuccessionProposal!]! @derivedFrom(field: "dossier")
+  openedAt: BigInt!
+  finalizedAt: BigInt
+  txHash: Bytes!
+}
+
+type SuccessionProposal @entity {
+  id: ID!                         # proposalId
+  dossier: SuccessionDossier!
+  voteType: String!               # Sell / Rent / Renovate
+  executed: Boolean!
+  votes: [Vote!]! @derivedFrom(field: "proposal")
+  createdAt: BigInt!
+  executedAt: BigInt
+  txHash: Bytes!
+}
+
+type Vote @entity {
+  id: ID!                         # proposalId-voter
+  proposal: SuccessionProposal!
+  voter: Bytes!
+  inFavor: Boolean!
+  weight: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+}
+
+# ── Justice ─────────────────────────────────
+
+type JusticeAction @entity {
+  id: ID!                         # actionId
+  property: Property!
+  actionType: String!             # Freeze / BurnRemint / SocialRecovery
+  tokenId: BigInt!
+  proposedBy: Bytes!
+  executed: Boolean!
+  totalSignatures: Int!
+  signatures: [JusticeSignature!]! @derivedFrom(field: "action")
+  createdAt: BigInt!
+  executedAt: BigInt
+  txHash: Bytes!
+}
+
+type JusticeSignature @entity {
+  id: ID!                         # actionId-signer
+  action: JusticeAction!
+  signer: Bytes!
+  signatureIndex: Int!
+  timestamp: BigInt!
+  txHash: Bytes!
+}
+
+type Recovery @entity {
+  id: ID!                         # recoveryId
+  tokenId: BigInt!
+  currentOwner: Bytes!
+  newWallet: Bytes!
+  executed: Boolean!
+  requestedAt: BigInt!
+  executedAt: BigInt
+  txHash: Bytes!
+}
+
+# ── Global Stats ────────────────────────────
+
+type GlobalStat @entity {
+  id: ID!                         # singleton "global"
+  totalProperties: Int!
+  totalTransfers: Int!
+  totalEncumbrances: Int!
+  totalEscrowDeals: Int!
+  totalSuccessions: Int!
+  totalJusticeActions: Int!
+  totalFraudAlerts: Int!
+}

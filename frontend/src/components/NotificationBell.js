@@ -1,6 +1,6 @@
 "use client";
+import { AlertTriangle, Bell, Info, X } from "lucide-react";
 import { useState } from "react";
-import { Bell, X, AlertTriangle, CheckCircle, Info } from "lucide-react";
 import { useNotifications } from "../hooks/useNotifications";
 
 const SEVERITY_CONFIG = {

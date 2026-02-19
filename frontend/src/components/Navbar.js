@@ -4,6 +4,7 @@ import { useWallet } from "@/context/WalletContext";
 import { Menu, Shield, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import NotificationBell from "./NotificationBell";
 
 const NAV_LINKS = [
   { href: "/dashboard", label: "Dashboard" },
@@ -43,8 +44,9 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Wallet */}
+          {/* Wallet + Notifications */}
           <div className="hidden md:flex items-center gap-3">
+            {isConnected && <NotificationBell />}
             {isConnected ? (
               <>
                 {role && <span className="badge badge-green">{role}</span>}

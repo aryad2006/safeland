@@ -1,9 +1,11 @@
 require("dotenv").config({ path: "../.env" });
+const http = require("http");
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
+const NotificationService = require("./services/notifications");
 
 const propertyRoutes = require("./routes/properties");
 const escrowRoutes = require("./routes/escrow");
@@ -62,9 +64,37 @@ app.use((err, req, res, next) => {
 });
 
 // ─── Start ────────────────────────────────────────────────
-app.listen(PORT, () => {
+const server = http.createServer(app);
+
+// WebSocket Notifications
+const notifications = new NotificationService(server);
+
+// Route pour les stats WS
+app.get("/api/notifications/stats", (req, res) => {
+  res.json(notifications.getStats());
+});
+
+// Démarrer l'écoute blockchain si les adresses sont configurées
+const contractAddresses = {
+  nft: process.env.NFT_ADDRESS,
+  escrow: process.env.ESCROW_ADDRESS,
+  fridda: process.env.FRIDDA_ADDRESS,
+  justice: process.env.JUSTICE_ADDRESS,
+  registry: process.env.REGISTRY_ADDRESS,
+};
+
+if (Object.values(contractAddresses).some(Boolean)) {
+  notifications.startListening(contractAddresses);
+}
+
+// Exposer pour les tests
+app.locals.notifications = notifications;
+
+server.listen(PORT, () => {
   console.log(`🏗️  SafeLand API démarrée sur http://localhost:${PORT}`);
   console.log(`📋 Health: http://localhost:${PORT}/api/health`);
+  console.log(`🔔 WebSocket: ws://localhost:${PORT}/ws`);
+  console.log(`📊 WS Stats: http://localhost:${PORT}/api/notifications/stats`);
 });
 
 module.exports = app;

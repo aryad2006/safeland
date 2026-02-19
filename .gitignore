@@ -16,3 +16,11 @@ backend/dist/
 frontend/node_modules/
 frontend/.next/
 frontend/out/
+
+# Subgraph
+subgraph/node_modules/
+subgraph/build/
+subgraph/generated/
+
+# Slither
+slither-report.json

@@ -91,6 +91,10 @@ contract SafeLandEscrow is
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(ADMIN_ROLE, admin);
 
+        require(_nftContract != address(0), "Escrow: zero NFT address");
+        require(_dgiWallet != address(0), "Escrow: zero DGI address");
+        require(_ancfccWallet != address(0), "Escrow: zero ANCFCC address");
+
         nftContract = ISafeLandNFT(_nftContract);
         dgiWallet = _dgiWallet;
         ancfccWallet = _ancfccWallet;
@@ -172,7 +176,12 @@ contract SafeLandEscrow is
         uint256 ancfccAmount = (price * ANCFCC_FEE_BPS) / BPS_DENOMINATOR;
         uint256 sellerNet = price - dgiAmount - ancfccAmount;
 
-        // Paiements
+        // Effects avant interactions (CEI pattern)
+        deal.status = EscrowStatus.Completed;
+        deal.completedAt = block.timestamp;
+        _tokenToDeal[deal.tokenId] = 0;
+
+        // Interactions — paiements
         _safeTransfer(dgiWallet, dgiAmount);
         _safeTransfer(ancfccWallet, ancfccAmount);
         _safeTransfer(deal.seller, sellerNet);
@@ -186,10 +195,6 @@ contract SafeLandEscrow is
             deal.notary
         );
 
-        deal.status = EscrowStatus.Completed;
-        deal.completedAt = block.timestamp;
-        _tokenToDeal[deal.tokenId] = 0;
-
         emit DealCompleted(dealId, dgiAmount, ancfccAmount, sellerNet);
     }
 
@@ -202,15 +207,16 @@ contract SafeLandEscrow is
         );
         require(deal.status != EscrowStatus.Completed, "Escrow: already completed");
 
+        // Effects avant interactions (CEI pattern)
+        deal.status = EscrowStatus.Cancelled;
+        _tokenToDeal[deal.tokenId] = 0;
+
         // Rembourser l'acheteur si des fonds ont été déposés
         if (deal.deposit > 0) {
             uint256 refund = deal.deposit;
             deal.deposit = 0;
             _safeTransfer(deal.buyer, refund);
         }
-
-        deal.status = EscrowStatus.Cancelled;
-        _tokenToDeal[deal.tokenId] = 0;
 
         emit DealCancelled(dealId, reason);
     }

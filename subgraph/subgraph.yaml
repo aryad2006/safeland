@@ -1,0 +1,174 @@
+specVersion: 0.0.5
+description: SafeLand — Moroccan Land Registry on Blockchain
+repository: https://github.com/user/safeland
+schema:
+  file: ./schema.graphql
+
+dataSources:
+  # ── SafeLandNFT ────────────────────────────
+  - kind: ethereum/contract
+    name: SafeLandNFT
+    network: sepolia
+    source:
+      address: "0x0000000000000000000000000000000000000000" # Replace after deployment
+      abi: SafeLandNFT
+      startBlock: 0 # Replace with deployment block
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Property
+        - Encumbrance
+        - PropertyTransfer
+        - GlobalStat
+      abis:
+        - name: SafeLandNFT
+          file: ./abis/SafeLandNFT.json
+      eventHandlers:
+        - event: PropertyCreated(indexed uint256,string,address,address)
+          handler: handlePropertyCreated
+        - event: PropertyTransferred(indexed uint256,indexed address,indexed address,string)
+          handler: handlePropertyTransferred
+        - event: EncumbranceAdded(indexed uint256,string,address)
+          handler: handleEncumbranceAdded
+        - event: EncumbranceRemoved(indexed uint256,uint256)
+          handler: handleEncumbranceRemoved
+        - event: TransferLocked(indexed uint256,string)
+          handler: handleTransferLocked
+        - event: TransferUnlocked(indexed uint256)
+          handler: handleTransferUnlocked
+        - event: PropertyFrozenByJustice(indexed uint256,bytes32)
+          handler: handlePropertyFrozen
+        - event: PropertyBurned(indexed uint256,bytes32)
+          handler: handlePropertyBurned
+      file: ./src/mappings/nft.ts
+
+  # ── SafeLandRegistry ──────────────────────
+  - kind: ethereum/contract
+    name: SafeLandRegistry
+    network: sepolia
+    source:
+      address: "0x0000000000000000000000000000000000000000" # Replace after deployment
+      abi: SafeLandRegistry
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - RegistryEntry
+        - RegistryTransaction
+        - FraudAlert
+      abis:
+        - name: SafeLandRegistry
+          file: ./abis/SafeLandRegistry.json
+      eventHandlers:
+        - event: PropertyRegistered(indexed uint256,string,string,address)
+          handler: handlePropertyRegistered
+        - event: TransactionRecorded(indexed uint256,address,address,string)
+          handler: handleTransactionRecorded
+        - event: FraudPrevented(indexed uint256,string)
+          handler: handleFraudPrevented
+      file: ./src/mappings/registry.ts
+
+  # ── SafeLandEscrow ────────────────────────
+  - kind: ethereum/contract
+    name: SafeLandEscrow
+    network: sepolia
+    source:
+      address: "0x0000000000000000000000000000000000000000" # Replace after deployment
+      abi: SafeLandEscrow
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - EscrowDeal
+        - GlobalStat
+      abis:
+        - name: SafeLandEscrow
+          file: ./abis/SafeLandEscrow.json
+      eventHandlers:
+        - event: DealCreated(indexed uint256,indexed uint256,address,address,uint256)
+          handler: handleDealCreated
+        - event: SellerSigned(indexed uint256)
+          handler: handleSellerSigned
+        - event: BuyerFunded(indexed uint256,uint256)
+          handler: handleBuyerFunded
+        - event: NotaryValidated(indexed uint256)
+          handler: handleNotaryValidated
+        - event: DealCompleted(indexed uint256,uint256,uint256,uint256)
+          handler: handleDealCompleted
+        - event: DealCancelled(indexed uint256,string)
+          handler: handleDealCancelled
+      file: ./src/mappings/escrow.ts
+
+  # ── SafeLandFridda ────────────────────────
+  - kind: ethereum/contract
+    name: SafeLandFridda
+    network: sepolia
+    source:
+      address: "0x0000000000000000000000000000000000000000" # Replace after deployment
+      abi: SafeLandFridda
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - SuccessionDossier
+        - SuccessionProposal
+        - Vote
+        - GlobalStat
+      abis:
+        - name: SafeLandFridda
+          file: ./abis/SafeLandFridda.json
+      eventHandlers:
+        - event: SuccessionOpened(indexed uint256,indexed uint256,address)
+          handler: handleSuccessionOpened
+        - event: SharesDistributed(indexed uint256,address[],uint256[])
+          handler: handleSharesDistributed
+        - event: SuccessionFinalized(indexed uint256)
+          handler: handleSuccessionFinalized
+        - event: ProposalCreated(indexed uint256,indexed uint256,uint8)
+          handler: handleProposalCreated
+        - event: VoteCast(indexed uint256,address,bool,uint256)
+          handler: handleVoteCast
+        - event: ProposalExecuted(indexed uint256)
+          handler: handleProposalExecuted
+      file: ./src/mappings/fridda.ts
+
+  # ── SafeLandJustice ───────────────────────
+  - kind: ethereum/contract
+    name: SafeLandJustice
+    network: sepolia
+    source:
+      address: "0x0000000000000000000000000000000000000000" # Replace after deployment
+      abi: SafeLandJustice
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - JusticeAction
+        - JusticeSignature
+        - Recovery
+        - GlobalStat
+      abis:
+        - name: SafeLandJustice
+          file: ./abis/SafeLandJustice.json
+      eventHandlers:
+        - event: ActionProposed(indexed uint256,uint8,uint256,address)
+          handler: handleActionProposed
+        - event: ActionSigned(indexed uint256,address,uint256)
+          handler: handleActionSigned
+        - event: ActionExecuted(indexed uint256,uint8,uint256)
+          handler: handleActionExecuted
+        - event: RecoveryRequested(indexed uint256,uint256,address,address)
+          handler: handleRecoveryRequested
+        - event: RecoveryExecuted(indexed uint256,uint256,address)
+          handler: handleRecoveryExecuted
+      file: ./src/mappings/justice.ts

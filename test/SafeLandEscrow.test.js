@@ -230,5 +230,164 @@ describe("SafeLandEscrow", function () {
         escrow.connect(seller).buyerDeposit(1, { value: SALE_PRICE })
       ).to.be.revertedWith("Escrow: not buyer");
     });
+
+    // ─── Branches initialize ──────────────────────────────
+    it("devrait refuser initialize avec nftContract zero", async function () {
+      const SafeLandEscrow = await ethers.getContractFactory("SafeLandEscrow");
+      await expect(
+        upgrades.deployProxy(
+          SafeLandEscrow,
+          [admin.address, ethers.ZeroAddress, dgi.address, ancfcc.address],
+          { initializer: "initialize" }
+        )
+      ).to.be.revertedWith("Escrow: zero NFT address");
+    });
+
+    it("devrait refuser initialize avec dgiWallet zero", async function () {
+      const nftAddress = await nft.getAddress();
+      const SafeLandEscrow = await ethers.getContractFactory("SafeLandEscrow");
+      await expect(
+        upgrades.deployProxy(
+          SafeLandEscrow,
+          [admin.address, nftAddress, ethers.ZeroAddress, ancfcc.address],
+          { initializer: "initialize" }
+        )
+      ).to.be.revertedWith("Escrow: zero DGI address");
+    });
+
+    it("devrait refuser initialize avec ancfccWallet zero", async function () {
+      const nftAddress = await nft.getAddress();
+      const SafeLandEscrow = await ethers.getContractFactory("SafeLandEscrow");
+      await expect(
+        upgrades.deployProxy(
+          SafeLandEscrow,
+          [admin.address, nftAddress, dgi.address, ethers.ZeroAddress],
+          { initializer: "initialize" }
+        )
+      ).to.be.revertedWith("Escrow: zero ANCFCC address");
+    });
+
+    // ─── Branches createDeal ──────────────────────────────
+    it("devrait refuser createDeal si seller n est pas ownerOf", async function () {
+      const docHash = ethers.keccak256(ethers.toUtf8Bytes("contrat"));
+      await expect(
+        escrow.connect(notary).createDeal(1, buyer.address, seller.address, SALE_PRICE, docHash)
+      ).to.be.revertedWith("Escrow: not owner");
+    });
+
+    it("devrait refuser createDeal si token non transférable", async function () {
+      // Verrouiller le token
+      await nft.connect(seller).lockTransfer(1, "test_lock");
+      const docHash = ethers.keccak256(ethers.toUtf8Bytes("contrat"));
+      await expect(
+        escrow.connect(notary).createDeal(1, seller.address, buyer.address, SALE_PRICE, docHash)
+      ).to.be.revertedWith("Escrow: token not transferable");
+    });
+
+    it("devrait refuser createDeal avec prix zero", async function () {
+      const docHash = ethers.keccak256(ethers.toUtf8Bytes("contrat"));
+      await expect(
+        escrow.connect(notary).createDeal(1, seller.address, buyer.address, 0, docHash)
+      ).to.be.revertedWith("Escrow: zero price");
+    });
+
+    // ─── Branches sellerSign ──────────────────────────────
+    it("devrait refuser sellerSign si mauvais status", async function () {
+      const docHash = ethers.keccak256(ethers.toUtf8Bytes("contrat"));
+      await escrow.connect(notary).createDeal(1, seller.address, buyer.address, SALE_PRICE, docHash);
+      await escrow.connect(seller).sellerSign(1);
+      // Maintenant le status est SellerSigned, pas Created
+      await expect(
+        escrow.connect(seller).sellerSign(1)
+      ).to.be.revertedWith("Escrow: wrong status");
+    });
+
+    // ─── Branches buyerDeposit ────────────────────────────
+    it("devrait refuser buyerDeposit si seller n a pas signé", async function () {
+      const docHash = ethers.keccak256(ethers.toUtf8Bytes("contrat"));
+      await escrow.connect(notary).createDeal(1, seller.address, buyer.address, SALE_PRICE, docHash);
+      await expect(
+        escrow.connect(buyer).buyerDeposit(1, { value: SALE_PRICE })
+      ).to.be.revertedWith("Escrow: seller must sign first");
+    });
+
+    // ─── Branches notaryComplete ──────────────────────────
+    it("devrait refuser notaryComplete si pas funded", async function () {
+      const docHash = ethers.keccak256(ethers.toUtf8Bytes("contrat"));
+      await escrow.connect(notary).createDeal(1, seller.address, buyer.address, SALE_PRICE, docHash);
+      await escrow.connect(seller).sellerSign(1);
+      await expect(
+        escrow.connect(notary).notaryComplete(1)
+      ).to.be.revertedWith("Escrow: not funded");
+    });
+
+    it("devrait refuser notaryComplete par un autre notaire", async function () {
+      const docHash = ethers.keccak256(ethers.toUtf8Bytes("contrat"));
+      await escrow.connect(notary).createDeal(1, seller.address, buyer.address, SALE_PRICE, docHash);
+      await escrow.connect(seller).sellerSign(1);
+      await escrow.connect(buyer).buyerDeposit(1, { value: SALE_PRICE });
+
+      // Créer un 2e notaire
+      const [,,,,,,, notary2] = await ethers.getSigners();
+      await escrow.connect(admin).grantRole(NOTARY_ROLE, notary2.address);
+      await expect(
+        escrow.connect(notary2).notaryComplete(1)
+      ).to.be.revertedWith("Escrow: not assigned notary");
+    });
+
+    it("devrait refuser notaryComplete quand en pause", async function () {
+      const docHash = ethers.keccak256(ethers.toUtf8Bytes("contrat"));
+      await escrow.connect(notary).createDeal(1, seller.address, buyer.address, SALE_PRICE, docHash);
+      await escrow.connect(seller).sellerSign(1);
+      await escrow.connect(buyer).buyerDeposit(1, { value: SALE_PRICE });
+      await escrow.connect(admin).pause();
+      await expect(
+        escrow.connect(notary).notaryComplete(1)
+      ).to.be.reverted;
+    });
+
+    // ─── Branches cancelDeal ──────────────────────────────
+    it("devrait refuser cancelDeal par un non-autorisé", async function () {
+      const docHash = ethers.keccak256(ethers.toUtf8Bytes("contrat"));
+      await escrow.connect(notary).createDeal(1, seller.address, buyer.address, SALE_PRICE, docHash);
+      await expect(
+        escrow.connect(buyer).cancelDeal(1, "unauthorized")
+      ).to.be.revertedWith("Escrow: not authorized");
+    });
+
+    it("devrait refuser cancelDeal si déjà completed", async function () {
+      const docHash = ethers.keccak256(ethers.toUtf8Bytes("contrat"));
+      await escrow.connect(notary).createDeal(1, seller.address, buyer.address, SALE_PRICE, docHash);
+      await escrow.connect(seller).sellerSign(1);
+      await escrow.connect(buyer).buyerDeposit(1, { value: SALE_PRICE });
+      await escrow.connect(notary).notaryComplete(1);
+      await expect(
+        escrow.connect(notary).cancelDeal(1, "too late")
+      ).to.be.revertedWith("Escrow: already completed");
+    });
+
+    // ─── Branches setWallet sans rôle ─────────────────────
+    it("devrait refuser setDgiWallet par un non-admin", async function () {
+      await expect(
+        escrow.connect(buyer).setDgiWallet(buyer.address)
+      ).to.be.reverted;
+    });
+
+    it("devrait refuser setAncfccWallet par un non-admin", async function () {
+      await expect(
+        escrow.connect(buyer).setAncfccWallet(buyer.address)
+      ).to.be.reverted;
+    });
+
+    // ─── Branches cancel seller avant funding ─────────────
+    it("devrait permettre au seller d annuler via notaire avant funding", async function () {
+      const docHash = ethers.keccak256(ethers.toUtf8Bytes("contrat"));
+      await escrow.connect(notary).createDeal(1, seller.address, buyer.address, SALE_PRICE, docHash);
+      await escrow.connect(seller).sellerSign(1);
+      // Cancel après signature mais avant dépôt → pas de refund needed
+      await escrow.connect(notary).cancelDeal(1, "seller_changed_mind");
+      const deal = await escrow.getDeal(1);
+      expect(deal.status).to.equal(5); // Cancelled
+    });
   });
 });

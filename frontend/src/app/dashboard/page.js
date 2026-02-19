@@ -1,6 +1,7 @@
 "use client";
 
 import { useWallet } from "@/context/WalletContext";
+import { useI18n } from "@/i18n";
 import {
     BarChart3,
     FileText,
@@ -13,39 +14,40 @@ import Link from "next/link";
 
 export default function Dashboard() {
   const { account, isConnected } = useWallet();
+  const { t } = useI18n();
 
   const cards = [
     {
-      title: "Titres Fonciers",
-      description: "Consulter, créer et transférer des titres NFT",
+      title: t("properties.title"),
+      description: t("dashboard.cards.properties"),
       icon: <Home className="w-8 h-8" />,
       href: "/properties",
       color: "from-green-500 to-emerald-600",
     },
     {
-      title: "Escrow",
-      description: "Gérer les transactions sécurisées avec split fiscal",
+      title: t("escrow.title"),
+      description: t("dashboard.cards.escrow"),
       icon: <FileText className="w-8 h-8" />,
       href: "/escrow",
       color: "from-blue-500 to-indigo-600",
     },
     {
-      title: "Fridda — Successions",
-      description: "Dossiers de succession et gouvernance héritiers",
+      title: t("fridda.title"),
+      description: t("dashboard.cards.fridda"),
       icon: <Users className="w-8 h-8" />,
       href: "/fridda",
       color: "from-purple-500 to-violet-600",
     },
     {
-      title: "Justice",
-      description: "Actions judiciaires, gel et récupération sociale",
+      title: t("justice.title"),
+      description: t("dashboard.cards.justice"),
       icon: <Scale className="w-8 h-8" />,
       href: "/justice",
       color: "from-red-500 to-rose-600",
     },
     {
-      title: "Statistiques",
-      description: "Tableau de bord global du registre foncier",
+      title: t("stats.title"),
+      description: t("dashboard.cards.stats"),
       icon: <BarChart3 className="w-8 h-8" />,
       href: "/stats",
       color: "from-amber-500 to-orange-600",
@@ -63,17 +65,16 @@ export default function Dashboard() {
           Safe<span className="text-safeland-600">Land</span>
         </h1>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          Cadastre Blockchain Souverain du Royaume du Maroc — Sécurisation
-          foncière par NFT, escrow fiscal et succession Fridda
+          {t("dashboard.subtitle")}
         </p>
         {!isConnected && (
           <p className="mt-4 text-sm text-yellow-700 bg-yellow-50 inline-block px-4 py-2 rounded-lg">
-            Connectez votre wallet MetaMask pour accéder aux fonctionnalités
+            {t("dashboard.connectPrompt")}
           </p>
         )}
         {isConnected && (
           <p className="mt-4 text-sm text-safeland-700 bg-safeland-50 inline-block px-4 py-2 rounded-lg">
-            Connecté : {account.slice(0, 6)}...{account.slice(-4)}
+            {t("dashboard.connected")} {account.slice(0, 6)}...{account.slice(-4)}
           </p>
         )}
       </div>
@@ -99,27 +100,27 @@ export default function Dashboard() {
 
       {/* Architecture Info */}
       <div className="mt-12 glass rounded-xl p-6">
-        <h3 className="text-lg font-semibold mb-4">Architecture SafeLand</h3>
+        <h3 className="text-lg font-semibold mb-4">{t("dashboard.architecture")}</h3>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center text-sm">
           <div className="p-3 bg-green-50 rounded-lg">
             <div className="font-bold text-safeland-700">SafeLandNFT</div>
-            <div className="text-gray-500">ERC-721 Titres</div>
+            <div className="text-gray-500">{t("dashboard.contracts.nft")}</div>
           </div>
           <div className="p-3 bg-blue-50 rounded-lg">
             <div className="font-bold text-blue-700">Registry</div>
-            <div className="text-gray-500">Index Central</div>
+            <div className="text-gray-500">{t("dashboard.contracts.registry")}</div>
           </div>
           <div className="p-3 bg-indigo-50 rounded-lg">
             <div className="font-bold text-indigo-700">Escrow</div>
-            <div className="text-gray-500">Split Fiscal</div>
+            <div className="text-gray-500">{t("dashboard.contracts.escrow")}</div>
           </div>
           <div className="p-3 bg-purple-50 rounded-lg">
             <div className="font-bold text-purple-700">Fridda</div>
-            <div className="text-gray-500">ERC-1155 Succession</div>
+            <div className="text-gray-500">{t("dashboard.contracts.fridda")}</div>
           </div>
           <div className="p-3 bg-red-50 rounded-lg">
             <div className="font-bold text-red-700">Justice</div>
-            <div className="text-gray-500">Multi-Sig</div>
+            <div className="text-gray-500">{t("dashboard.contracts.justice")}</div>
           </div>
         </div>
       </div>

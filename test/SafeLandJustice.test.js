@@ -242,5 +242,23 @@ describe("SafeLandJustice", function () {
       const upgraded = await upgrades.upgradeProxy(await justice.getAddress(), JusticeV2);
       expect(await upgraded.totalActions()).to.equal(0);
     });
+
+    // ─── Branches requestRecovery ─────────────────────────
+    it("devrait refuser requestRecovery vers address(0)", async function () {
+      await expect(
+        justice.connect(judge1).requestRecovery(1, ethers.ZeroAddress)
+      ).to.be.revertedWith("Justice: zero address");
+    });
+
+    // ─── Branches executeAction ───────────────────────────
+    it("devrait refuser executeAction par un non-juge", async function () {
+      await justice.connect(judge1).proposeAction(
+        1, ethers.ZeroAddress, ethers.ZeroHash, "", 0
+      );
+      await justice.connect(judge2).signAction(1);
+      await expect(
+        justice.connect(owner1).executeAction(1)
+      ).to.be.reverted;
+    });
   });
 });

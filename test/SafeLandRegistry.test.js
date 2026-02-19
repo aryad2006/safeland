@@ -134,5 +134,32 @@ describe("SafeLandRegistry", function () {
         registry.connect(user).recordTransaction(0, admin.address, user.address, "sale")
       ).to.be.reverted;
     });
+
+    // ─── Branch _removeFromOwner quand tokenId absent ─────
+    it("devrait supporter recordTransaction quand from n a pas le token dans l index", async function () {
+      // recordTransaction sans registerProperty au préalable
+      // _removeFromOwner ne trouvera rien mais ne doit pas revert
+      await registry.connect(operator).recordTransaction(999, user.address, admin.address, "transfer");
+      const stats = await registry.getStats();
+      expect(stats.totalTransactions).to.equal(1);
+    });
+
+    it("devrait gérer un txType non justice_override sans incrémenter justicOverrides", async function () {
+      await registry.connect(operator).recordTransaction(0, admin.address, user.address, "inheritance");
+      const stats = await registry.getStats();
+      expect(stats.totalTransactions).to.equal(1);
+      expect(stats.justicOverrides).to.equal(0);
+    });
+
+    it("devrait gérer _removeFromOwner quand le token n est pas dans la liste du propriétaire", async function () {
+      // user a le token 10 mais on transfère le token 999 (absent)
+      await registry.connect(operator).registerProperty(10, "Rabat", "residential", user.address);
+      await registry.connect(operator).registerProperty(20, "Fès", "commercial", user.address);
+      // Transférer un token que user n'a PAS (token 999) — loop complète sans match
+      await registry.connect(operator).recordTransaction(999, user.address, admin.address, "sale");
+      // user a toujours ses 2 tokens
+      const byOwner = await registry.getByOwner(user.address);
+      expect(byOwner.length).to.equal(2);
+    });
   });
 });

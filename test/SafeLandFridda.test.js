@@ -218,5 +218,128 @@ describe("SafeLandFridda", function () {
         fridda.connect(notary).distributeShares(2, [heir1.address, heir2.address], [6])
       ).to.be.revertedWith("Fridda: length mismatch");
     });
+
+    // ─── Branches openSuccession ──────────────────────────
+    it("devrait refuser openSuccession avec totalShares zero", async function () {
+      const h = ethers.keccak256(ethers.toUtf8Bytes("x"));
+      await expect(
+        fridda.connect(notary).openSuccession(99, admin.address, 0, h, h)
+      ).to.be.revertedWith("Fridda: zero shares");
+    });
+
+    it("devrait refuser openSuccession si déjà ouverte pour le même NFT", async function () {
+      const h = ethers.keccak256(ethers.toUtf8Bytes("x"));
+      // nftTokenId = 42 est déjà ouvert dans le beforeEach du describe parent
+      await expect(
+        fridda.connect(notary).openSuccession(42, admin.address, 24, h, h)
+      ).to.be.revertedWith("Fridda: succession already open");
+    });
+
+    // ─── Branches distributeShares ────────────────────────
+    it("devrait refuser distributeShares sans héritiers", async function () {
+      const h = ethers.keccak256(ethers.toUtf8Bytes("x"));
+      await fridda.connect(notary).openSuccession(200, admin.address, 12, h, h);
+      await expect(
+        fridda.connect(notary).distributeShares(2, [], [])
+      ).to.be.revertedWith("Fridda: no heirs");
+    });
+
+    it("devrait refuser distributeShares avec héritier address(0)", async function () {
+      const h = ethers.keccak256(ethers.toUtf8Bytes("x"));
+      await fridda.connect(notary).openSuccession(201, admin.address, 12, h, h);
+      await expect(
+        fridda.connect(notary).distributeShares(2, [ethers.ZeroAddress], [12])
+      ).to.be.revertedWith("Fridda: zero address heir");
+    });
+
+    it("devrait refuser distributeShares avec parts zero", async function () {
+      const h = ethers.keccak256(ethers.toUtf8Bytes("x"));
+      await fridda.connect(notary).openSuccession(202, admin.address, 12, h, h);
+      await expect(
+        fridda.connect(notary).distributeShares(2, [heir1.address], [0])
+      ).to.be.revertedWith("Fridda: zero share");
+    });
+
+    it("devrait refuser distributeShares si déjà finalisé", async function () {
+      // Le dossier 1 est déjà finalisé dans le beforeEach
+      await expect(
+        fridda.connect(notary).distributeShares(
+          1, [heir1.address], [24]
+        )
+      ).to.be.revertedWith("Fridda: already finalized");
+    });
+
+    // ─── Branches finalizeSuccession ──────────────────────
+    it("devrait refuser finalizeSuccession si déjà finalisé", async function () {
+      await expect(
+        fridda.connect(notary).finalizeSuccession(1)
+      ).to.be.revertedWith("Fridda: already finalized");
+    });
+
+    it("devrait refuser finalizeSuccession sans parts distribuées", async function () {
+      const h = ethers.keccak256(ethers.toUtf8Bytes("x"));
+      await fridda.connect(notary).openSuccession(300, admin.address, 24, h, h);
+      await expect(
+        fridda.connect(notary).finalizeSuccession(2)
+      ).to.be.revertedWith("Fridda: no shares distributed");
+    });
+
+    it("devrait refuser finalizeSuccession par un non-notaire", async function () {
+      const h = ethers.keccak256(ethers.toUtf8Bytes("x"));
+      await fridda.connect(notary).openSuccession(301, admin.address, 24, h, h);
+      await fridda.connect(notary).distributeShares(2, [heir1.address, heir2.address, heir3.address], [3, 14, 7]);
+      await expect(
+        fridda.connect(heir1).finalizeSuccession(2)
+      ).to.be.reverted;
+    });
+
+    // ─── Branches createProposal ──────────────────────────
+    it("devrait refuser createProposal si pas finalisé", async function () {
+      const h = ethers.keccak256(ethers.toUtf8Bytes("x"));
+      await fridda.connect(notary).openSuccession(400, admin.address, 24, h, h);
+      await fridda.connect(notary).distributeShares(2, [heir1.address, heir2.address, heir3.address], [3, 14, 7]);
+      // Pas finalisé !
+      await expect(
+        fridda.connect(heir1).createProposal(2, 0, "test", 5000, 7)
+      ).to.be.revertedWith("Fridda: not finalized");
+    });
+
+    it("devrait refuser createProposal par un non-héritier", async function () {
+      await expect(
+        fridda.connect(admin).createProposal(1, 0, "test", 5000, 7)
+      ).to.be.revertedWith("Fridda: not an heir");
+    });
+
+    it("devrait refuser createProposal avec quorum zero", async function () {
+      await expect(
+        fridda.connect(heir1).createProposal(1, 0, "test", 0, 7)
+      ).to.be.revertedWith("Fridda: invalid quorum");
+    });
+
+    it("devrait refuser createProposal avec quorum > 10000", async function () {
+      await expect(
+        fridda.connect(heir1).createProposal(1, 0, "test", 10001, 7)
+      ).to.be.revertedWith("Fridda: invalid quorum");
+    });
+
+    // ─── Branches vote ────────────────────────────────────
+    it("devrait refuser un vote après la deadline", async function () {
+      await fridda.connect(heir2).createProposal(1, 0, "test", 5000, 1);
+      // Avancer le temps au-delà de la deadline
+      await ethers.provider.send("evm_increaseTime", [86401]);
+      await ethers.provider.send("evm_mine", []);
+      await expect(
+        fridda.connect(heir1).vote(1, true)
+      ).to.be.revertedWith("Fridda: vote ended");
+    });
+
+    // ─── Branches distributeShares sans rôle ──────────────
+    it("devrait refuser distributeShares par un non-notaire", async function () {
+      const h = ethers.keccak256(ethers.toUtf8Bytes("x"));
+      await fridda.connect(notary).openSuccession(500, admin.address, 12, h, h);
+      await expect(
+        fridda.connect(heir1).distributeShares(2, [heir1.address], [12])
+      ).to.be.reverted;
+    });
   });
 });

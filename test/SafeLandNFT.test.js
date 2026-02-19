@@ -331,5 +331,220 @@ describe("SafeLandNFT", function () {
         )
       ).to.be.revertedWith("SafeLand: empty titre");
     });
+
+    // ─── Branches transferProperty ────────────────────────
+    it("devrait refuser transferProperty vers address(0)", async function () {
+      const docHash = ethers.keccak256(ethers.toUtf8Bytes("vente"));
+      await expect(
+        nft.connect(agent).transferProperty(1, ethers.ZeroAddress, "sale", docHash, notary.address)
+      ).to.be.revertedWith("SafeLand: zero address");
+    });
+
+    it("devrait refuser transferProperty quand gelé par la justice", async function () {
+      const judgmentHash = ethers.keccak256(ethers.toUtf8Bytes("jugement"));
+      await nft.connect(justice).freezeByJustice(1, judgmentHash);
+      const docHash = ethers.keccak256(ethers.toUtf8Bytes("vente"));
+      await expect(
+        nft.connect(agent).transferProperty(1, owner2.address, "sale", docHash, notary.address)
+      ).to.be.revertedWith("SafeLand: frozen by justice");
+    });
+
+    it("devrait refuser transferProperty quand en pause", async function () {
+      await nft.connect(admin).pause();
+      const docHash = ethers.keccak256(ethers.toUtf8Bytes("vente"));
+      await expect(
+        nft.connect(agent).transferProperty(1, owner2.address, "sale", docHash, notary.address)
+      ).to.be.reverted;
+    });
+
+    it("devrait refuser transferProperty sur un token inexistant", async function () {
+      const docHash = ethers.keccak256(ethers.toUtf8Bytes("vente"));
+      await expect(
+        nft.connect(agent).transferProperty(999, owner2.address, "sale", docHash, notary.address)
+      ).to.be.revertedWith("SafeLand: token does not exist");
+    });
+
+    // ─── Branches removeEncumbrance ───────────────────────
+    it("devrait refuser removeEncumbrance avec index invalide", async function () {
+      await expect(
+        nft.connect(agent).removeEncumbrance(1, 99)
+      ).to.be.revertedWith("SafeLand: bad index");
+    });
+
+    // ─── Branches findByTitreFoncier ──────────────────────
+    it("devrait refuser findByTitreFoncier si titre inexistant", async function () {
+      await expect(
+        nft.findByTitreFoncier("INEXISTANT/R")
+      ).to.be.revertedWith("SafeLand: titre not found");
+    });
+
+    // ─── Branches vues sur tokens inexistants ─────────────
+    it("devrait refuser getProperty sur un token inexistant", async function () {
+      await expect(
+        nft.getProperty(999)
+      ).to.be.revertedWith("SafeLand: token does not exist");
+    });
+
+    it("devrait refuser getHistory sur un token inexistant", async function () {
+      await expect(
+        nft.getHistory(999)
+      ).to.be.revertedWith("SafeLand: token does not exist");
+    });
+
+    it("devrait refuser getEncumbrances sur un token inexistant", async function () {
+      await expect(
+        nft.getEncumbrances(999)
+      ).to.be.revertedWith("SafeLand: token does not exist");
+    });
+
+    // ─── Branches encumbrances types ──────────────────────
+    it("devrait ajouter une charge safe_lock et verrouiller", async function () {
+      await nft.connect(agent).addEncumbrance(1, "safe_lock", notary.address, 0, 0);
+      expect(await nft.canTransfer(1)).to.be.false;
+    });
+
+    it("devrait ajouter une servitude sans verrouiller", async function () {
+      await nft.connect(agent).addEncumbrance(1, "servitude", notary.address, 0, 0);
+      expect(await nft.canTransfer(1)).to.be.true;
+      const encs = await nft.getEncumbrances(1);
+      expect(encs.length).to.equal(1);
+      expect(encs[0].encType).to.equal("servitude");
+    });
+
+    // ─── Branches lock/unlock sur tokens inexistants ──────
+    it("devrait refuser lockTransfer sur un token inexistant", async function () {
+      await expect(
+        nft.connect(owner1).lockTransfer(999, "test")
+      ).to.be.revertedWith("SafeLand: token does not exist");
+    });
+
+    it("devrait refuser unlockTransfer sur un token inexistant", async function () {
+      await expect(
+        nft.connect(owner1).unlockTransfer(999)
+      ).to.be.revertedWith("SafeLand: token does not exist");
+    });
+
+    it("devrait refuser unlockTransfer par un non-propriétaire", async function () {
+      await nft.connect(owner1).lockTransfer(1, "test");
+      await expect(
+        nft.connect(owner2).unlockTransfer(1)
+      ).to.be.revertedWith("SafeLand: not owner or admin");
+    });
+
+    // ─── Branches freezeByJustice ─────────────────────────
+    it("devrait refuser freezeByJustice sans le rôle JUSTICE", async function () {
+      const hash = ethers.keccak256(ethers.toUtf8Bytes("jugement"));
+      await expect(
+        nft.connect(agent).freezeByJustice(1, hash)
+      ).to.be.reverted;
+    });
+
+    it("devrait refuser freezeByJustice sur un token inexistant", async function () {
+      const hash = ethers.keccak256(ethers.toUtf8Bytes("jugement"));
+      await expect(
+        nft.connect(justice).freezeByJustice(999, hash)
+      ).to.be.revertedWith("SafeLand: token does not exist");
+    });
+
+    // ─── Branches justiceOverride ─────────────────────────
+    it("devrait refuser justiceOverride vers address(0)", async function () {
+      const hash = ethers.keccak256(ethers.toUtf8Bytes("jugement"));
+      await expect(
+        nft.connect(justice).justiceOverride(1, ethers.ZeroAddress, hash, "ipfs://x")
+      ).to.be.revertedWith("SafeLand: zero address");
+    });
+
+    it("devrait refuser justiceOverride sur un token inexistant", async function () {
+      const hash = ethers.keccak256(ethers.toUtf8Bytes("jugement"));
+      await expect(
+        nft.connect(justice).justiceOverride(999, owner2.address, hash, "ipfs://x")
+      ).to.be.revertedWith("SafeLand: token does not exist");
+    });
+
+    // ─── Branches pause sans rôle admin ───────────────────
+    it("devrait refuser pause par un non-admin", async function () {
+      await expect(
+        nft.connect(owner1).pause()
+      ).to.be.reverted;
+    });
+
+    it("devrait refuser unpause par un non-admin", async function () {
+      await nft.connect(admin).pause();
+      await expect(
+        nft.connect(owner1).unpause()
+      ).to.be.reverted;
+    });
+
+    // ─── Branches vues ────────────────────────────────────
+    it("canTransfer devrait retourner false pour un token inexistant", async function () {
+      expect(await nft.canTransfer(999)).to.be.false;
+    });
+
+    it("devrait retourner le tokenURI correct", async function () {
+      const uri = await nft.tokenURI(1);
+      expect(uri).to.equal("ipfs://QmTest123");
+    });
+
+    it("devrait supporter les interfaces ERC721 et AccessControl", async function () {
+      // ERC721 interfaceId = 0x80ac58cd
+      expect(await nft.supportsInterface("0x80ac58cd")).to.be.true;
+      // AccessControl interfaceId = 0x7965db0b  
+      expect(await nft.supportsInterface("0x7965db0b")).to.be.true;
+    });
+
+    it("devrait retourner isFrozenByJustice false par défaut", async function () {
+      expect(await nft.isFrozenByJustice(1)).to.be.false;
+    });
+
+    // ─── Branches addEncumbrance sur token inexistant ─────
+    it("devrait refuser addEncumbrance sur un token inexistant", async function () {
+      await expect(
+        nft.connect(agent).addEncumbrance(999, "hypotheque", notary.address, 0, 0)
+      ).to.be.revertedWith("SafeLand: token does not exist");
+    });
+
+    it("devrait refuser removeEncumbrance sur un token inexistant", async function () {
+      await expect(
+        nft.connect(agent).removeEncumbrance(999, 0)
+      ).to.be.revertedWith("SafeLand: token does not exist");
+    });
+
+    it("devrait retourner isLocked false par défaut", async function () {
+      expect(await nft.isLocked(1)).to.be.false;
+    });
+
+    it("removeEncumbrance avec servitude ne doit pas toucher le lock", async function () {
+      await nft.connect(agent).addEncumbrance(1, "servitude", notary.address, 0, 0);
+      expect(await nft.canTransfer(1)).to.be.true;
+      await nft.connect(agent).removeEncumbrance(1, 0);
+      expect(await nft.canTransfer(1)).to.be.true;
+    });
+
+    it("devrait gérer safe_lock et le retirer proprement", async function () {
+      await nft.connect(agent).addEncumbrance(1, "safe_lock", notary.address, 0, 0);
+      expect(await nft.canTransfer(1)).to.be.false;
+      await nft.connect(agent).removeEncumbrance(1, 0);
+      expect(await nft.canTransfer(1)).to.be.true;
+    });
+
+    it("devrait gérer saisie et hypothèque ensemble", async function () {
+      await nft.connect(agent).addEncumbrance(1, "saisie", notary.address, 0, 0);
+      await nft.connect(agent).addEncumbrance(1, "hypotheque", notary.address, ethers.parseEther("100"), 0);
+      expect(await nft.canTransfer(1)).to.be.false;
+      // Retirer saisie - hypotheque reste
+      await nft.connect(agent).removeEncumbrance(1, 0);
+      expect(await nft.canTransfer(1)).to.be.false;
+      // Retirer hypotheque
+      await nft.connect(agent).removeEncumbrance(1, 1);
+      expect(await nft.canTransfer(1)).to.be.true;
+    });
+
+    it("devrait lire le totalMinted après justiceOverride", async function () {
+      const hash = ethers.keccak256(ethers.toUtf8Bytes("jugement"));
+      await nft.connect(justice).justiceOverride(1, owner2.address, hash, "ipfs://new");
+      // totalMinted ne change pas (même tokenId)
+      expect(await nft.totalMinted()).to.equal(1);
+      expect(await nft.ownerOf(1)).to.equal(owner2.address);
+    });
   });
 });

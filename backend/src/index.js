@@ -12,6 +12,7 @@ const escrowRoutes = require("./routes/escrow");
 const friddaRoutes = require("./routes/fridda");
 const authRoutes = require("./routes/auth");
 const ipfsRoutes = require("./routes/ipfs");
+const justiceRoutes = require("./routes/justice");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./config/swagger");
 
@@ -43,6 +44,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/properties", propertyRoutes);
 app.use("/api/escrow", escrowRoutes);
 app.use("/api/fridda", friddaRoutes);
+app.use("/api/justice", justiceRoutes);
 app.use("/api/ipfs", ipfsRoutes);
 
 // Health check

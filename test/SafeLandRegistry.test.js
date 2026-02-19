@@ -89,4 +89,50 @@ describe("SafeLandRegistry", function () {
       ).to.be.reverted;
     });
   });
+
+  describe("Couverture branches supplémentaires", function () {
+    it("devrait enregistrer un justice_override dans les stats", async function () {
+      await registry.connect(operator).registerProperty(0, "Casablanca", "residential", user.address);
+      await registry.connect(operator).recordTransaction(0, user.address, admin.address, "justice_override");
+      const stats = await registry.getStats();
+      expect(stats.justicOverrides).to.equal(1);
+    });
+
+    it("devrait retirer le token du propriétaire lors d un transfer", async function () {
+      // Enregistrer user comme proprio du token 10
+      await registry.connect(operator).registerProperty(10, "Rabat", "residential", user.address);
+      let byOwner = await registry.getByOwner(user.address);
+      expect(byOwner.length).to.equal(1);
+
+      // Transférer token 10 de user à admin
+      await registry.connect(operator).recordTransaction(10, user.address, admin.address, "sale");
+
+      // user n'a plus le token
+      byOwner = await registry.getByOwner(user.address);
+      expect(byOwner.length).to.equal(0);
+
+      // admin a le token
+      const byNewOwner = await registry.getByOwner(admin.address);
+      expect(byNewOwner).to.include(10n);
+    });
+
+    it("devrait supporter l upgrade UUPS", async function () {
+      const RegistryV2 = await ethers.getContractFactory("SafeLandRegistry");
+      const upgraded = await upgrades.upgradeProxy(await registry.getAddress(), RegistryV2);
+      const stats = await upgraded.getStats();
+      expect(stats.totalProperties).to.equal(0);
+    });
+
+    it("devrait refuser recordFraudPrevented par un non-opérateur", async function () {
+      await expect(
+        registry.connect(user).recordFraudPrevented(0, "test")
+      ).to.be.reverted;
+    });
+
+    it("devrait refuser recordTransaction par un non-opérateur", async function () {
+      await expect(
+        registry.connect(user).recordTransaction(0, admin.address, user.address, "sale")
+      ).to.be.reverted;
+    });
+  });
 });

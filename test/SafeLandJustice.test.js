@@ -184,5 +184,63 @@ describe("SafeLandJustice", function () {
         justice.connect(judge1).setRequiredSignatures(3)
       ).to.be.reverted;
     });
+
+    it("devrait refuser un seuil a zero", async function () {
+      await expect(
+        justice.setRequiredSignatures(0)
+      ).to.be.revertedWith("Justice: zero");
+    });
+  });
+
+  describe("Couverture branches supplémentaires", function () {
+    it("devrait executer un BurnRemint", async function () {
+      await justice.connect(judge1).proposeAction(
+        1, newOwner.address,
+        ethers.keccak256(ethers.toUtf8Bytes("burn-remint")),
+        "ipfs://new-uri", 1 // BurnRemint
+      );
+      await justice.connect(judge2).signAction(1);
+      const tx = await justice.connect(judge1).executeAction(1);
+      await expect(tx).to.emit(justice, "ActionExecuted");
+
+      const action = await justice.getAction(1);
+      expect(action[5]).to.equal(true); // executed
+    });
+
+    it("devrait executer un SocialRecovery", async function () {
+      await justice.connect(judge1).proposeAction(
+        1, newOwner.address,
+        ethers.keccak256(ethers.toUtf8Bytes("recovery")),
+        "ipfs://recovery-uri", 2 // SocialRecovery
+      );
+      await justice.connect(judge2).signAction(1);
+      const tx = await justice.connect(judge1).executeAction(1);
+      await expect(tx).to.emit(justice, "ActionExecuted");
+    });
+
+    it("devrait permettre un CONSERVATOR de demander une recuperation", async function () {
+      const CONSERVATOR_ROLE = await justice.CONSERVATOR_ROLE();
+      await justice.grantRole(CONSERVATOR_ROLE, owner1.address);
+
+      const tx = await justice.connect(owner1).requestRecovery(1, newOwner.address);
+      await expect(tx).to.emit(justice, "RecoveryRequested");
+    });
+
+    it("devrait refuser signAction sur une action deja executee", async function () {
+      await justice.connect(judge1).proposeAction(
+        1, ethers.ZeroAddress, ethers.ZeroHash, "", 0
+      );
+      await justice.connect(judge2).signAction(1);
+      await justice.connect(judge1).executeAction(1);
+      await expect(
+        justice.connect(judge3).signAction(1)
+      ).to.be.revertedWith("Justice: already executed");
+    });
+
+    it("devrait supporter l upgrade UUPS", async function () {
+      const JusticeV2 = await ethers.getContractFactory("SafeLandJustice");
+      const upgraded = await upgrades.upgradeProxy(await justice.getAddress(), JusticeV2);
+      expect(await upgraded.totalActions()).to.equal(0);
+    });
   });
 });

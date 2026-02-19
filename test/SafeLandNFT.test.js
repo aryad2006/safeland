@@ -253,4 +253,83 @@ describe("SafeLandNFT", function () {
       expect(await nft.totalMinted()).to.equal(1);
     });
   });
+
+  // ─── Tests couverture supplémentaires ───────────────────
+  describe("Couverture branches supplémentaires", function () {
+    beforeEach(async function () {
+      await createDefaultProperty(); // tokenId = 1
+    });
+
+    it("devrait gérer une charge de type saisie", async function () {
+      await nft.connect(agent).addEncumbrance(
+        1, "saisie", notary.address, 0, 0
+      );
+      expect(await nft.canTransfer(1)).to.be.false;
+    });
+
+    it("devrait garder le verrouillage quand il reste une charge bloquante active", async function () {
+      // Ajouter 2 hypothèques
+      await nft.connect(agent).addEncumbrance(1, "hypotheque", notary.address, ethers.parseEther("100000"), 0);
+      await nft.connect(agent).addEncumbrance(1, "hypotheque", notary.address, ethers.parseEther("200000"), 0);
+
+      // Retirer la première — il reste la deuxième
+      await nft.connect(agent).removeEncumbrance(1, 0);
+
+      // Toujours non-transférable car la 2e hypothèque est active
+      expect(await nft.canTransfer(1)).to.be.false;
+    });
+
+    it("l admin devrait pouvoir déverrouiller un titre", async function () {
+      await nft.connect(owner1).lockTransfer(1, "travel");
+      await nft.connect(admin).unlockTransfer(1);
+      expect(await nft.isLocked(1)).to.be.false;
+    });
+
+    it("canTransfer devrait retourner false si gelé par la justice", async function () {
+      const hash = ethers.keccak256(ethers.toUtf8Bytes("gel"));
+      await nft.connect(justice).freezeByJustice(1, hash);
+      expect(await nft.canTransfer(1)).to.be.false;
+    });
+
+    it("canTransfer devrait retourner false si en pause", async function () {
+      await nft.connect(admin).pause();
+      expect(await nft.canTransfer(1)).to.be.false;
+    });
+
+    it("devrait supporter l upgrade UUPS", async function () {
+      const SafeLandNFTV2 = await ethers.getContractFactory("SafeLandNFT");
+      const upgraded = await upgrades.upgradeProxy(await nft.getAddress(), SafeLandNFTV2);
+      expect(await upgraded.totalMinted()).to.equal(1);
+    });
+
+    it("devrait refuser createProperty avec address(0)", async function () {
+      const docHash = ethers.keccak256(ethers.toUtf8Bytes("doc"));
+      await expect(
+        nft.connect(agent).createProperty(
+          ethers.ZeroAddress, "NEW/R", "villa", 100,
+          "Rabat", "Agdal", 0, 0, "ipfs://x", docHash
+        )
+      ).to.be.revertedWith("SafeLand: zero address");
+    });
+
+    it("devrait refuser createProperty avec surface 0", async function () {
+      const docHash = ethers.keccak256(ethers.toUtf8Bytes("doc"));
+      await expect(
+        nft.connect(agent).createProperty(
+          owner1.address, "NEW2/R", "villa", 0,
+          "Rabat", "Agdal", 0, 0, "ipfs://x", docHash
+        )
+      ).to.be.revertedWith("SafeLand: zero surface");
+    });
+
+    it("devrait refuser createProperty avec titre vide", async function () {
+      const docHash = ethers.keccak256(ethers.toUtf8Bytes("doc"));
+      await expect(
+        nft.connect(agent).createProperty(
+          owner1.address, "", "villa", 100,
+          "Rabat", "Agdal", 0, 0, "ipfs://x", docHash
+        )
+      ).to.be.revertedWith("SafeLand: empty titre");
+    });
+  });
 });

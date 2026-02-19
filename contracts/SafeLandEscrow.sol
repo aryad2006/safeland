@@ -170,29 +170,39 @@ contract SafeLandEscrow is
         require(msg.sender == deal.notary, "Escrow: not assigned notary");
 
         uint256 price = deal.salePrice;
+        uint256 tokenId = deal.tokenId;
+        address seller = deal.seller;
+        address buyer = deal.buyer;
+        bytes32 docHash = deal.documentHash;
+        address notary = deal.notary;
 
         // Fractionnement fiscal At-the-Source
-        uint256 dgiAmount = (price * DGI_FEE_BPS) / BPS_DENOMINATOR;
-        uint256 ancfccAmount = (price * ANCFCC_FEE_BPS) / BPS_DENOMINATOR;
-        uint256 sellerNet = price - dgiAmount - ancfccAmount;
+        uint256 dgiAmount;
+        uint256 ancfccAmount;
+        uint256 sellerNet;
+        unchecked {
+            dgiAmount = (price * DGI_FEE_BPS) / BPS_DENOMINATOR;
+            ancfccAmount = (price * ANCFCC_FEE_BPS) / BPS_DENOMINATOR;
+            sellerNet = price - dgiAmount - ancfccAmount;
+        }
 
         // Effects avant interactions (CEI pattern)
         deal.status = EscrowStatus.Completed;
         deal.completedAt = block.timestamp;
-        _tokenToDeal[deal.tokenId] = 0;
+        _tokenToDeal[tokenId] = 0;
 
         // Interactions — paiements
         _safeTransfer(dgiWallet, dgiAmount);
         _safeTransfer(ancfccWallet, ancfccAmount);
-        _safeTransfer(deal.seller, sellerNet);
+        _safeTransfer(seller, sellerNet);
 
         // Transfert du NFT
         nftContract.transferProperty(
-            deal.tokenId,
-            deal.buyer,
+            tokenId,
+            buyer,
             "sale",
-            deal.documentHash,
-            deal.notary
+            docHash,
+            notary
         );
 
         emit DealCompleted(dealId, dgiAmount, ancfccAmount, sellerNet);
@@ -208,14 +218,17 @@ contract SafeLandEscrow is
         require(deal.status != EscrowStatus.Completed, "Escrow: already completed");
 
         // Effects avant interactions (CEI pattern)
+        uint256 tokenId = deal.tokenId;
+        address buyer = deal.buyer;
+        uint256 refund = deal.deposit;
+
         deal.status = EscrowStatus.Cancelled;
-        _tokenToDeal[deal.tokenId] = 0;
+        _tokenToDeal[tokenId] = 0;
 
         // Rembourser l'acheteur si des fonds ont été déposés
-        if (deal.deposit > 0) {
-            uint256 refund = deal.deposit;
+        if (refund > 0) {
             deal.deposit = 0;
-            _safeTransfer(deal.buyer, refund);
+            _safeTransfer(buyer, refund);
         }
 
         emit DealCancelled(dealId, reason);

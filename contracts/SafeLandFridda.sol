@@ -142,10 +142,11 @@ contract SafeLandFridda is
 
         // Vérifier que le total est correct
         uint256 sum = 0;
-        for (uint256 i = 0; i < shares.length; i++) {
+        uint256 heirsLen = heirs.length;
+        for (uint256 i = 0; i < heirsLen;) {
             require(heirs[i] != address(0), "Fridda: zero address heir");
             require(shares[i] > 0, "Fridda: zero share");
-            sum += shares[i];
+            unchecked { sum += shares[i]; ++i; }
         }
         require(sum == dossier.totalShares, "Fridda: shares mismatch total");
 
@@ -154,8 +155,9 @@ contract SafeLandFridda is
         dossier.shares = shares;
 
         // Mint ERC-1155 : chaque héritier reçoit ses parts (tokenId = dossierId)
-        for (uint256 i = 0; i < heirs.length; i++) {
+        for (uint256 i = 0; i < heirsLen;) {
             _mint(heirs[i], dossierId, shares[i], "");
+            unchecked { ++i; }
         }
 
         emit SharesDistributed(dossierId, heirs, shares);
@@ -216,15 +218,16 @@ contract SafeLandFridda is
         require(block.timestamp < prop.deadline, "Fridda: vote ended");
         require(!prop.hasVoted[msg.sender], "Fridda: already voted");
 
-        uint256 weight = balanceOf(msg.sender, prop.dossierId);
+        uint256 dossierId = prop.dossierId;
+        uint256 weight = balanceOf(msg.sender, dossierId);
         require(weight > 0, "Fridda: no voting power");
 
         prop.hasVoted[msg.sender] = true;
 
         if (inFavor) {
-            prop.votesFor += weight;
+            unchecked { prop.votesFor += weight; }
         } else {
-            prop.votesAgainst += weight;
+            unchecked { prop.votesAgainst += weight; }
         }
 
         emit VoteCast(proposalId, msg.sender, inFavor, weight);
@@ -238,7 +241,10 @@ contract SafeLandFridda is
         require(block.timestamp >= prop.deadline, "Fridda: vote not ended");
         require(!prop.executed, "Fridda: already executed");
 
-        uint256 required = (prop.totalEligible * prop.quorumBps) / 10000;
+        uint256 totalEligible = prop.totalEligible;
+        uint256 quorumBps = prop.quorumBps;
+        uint256 required;
+        unchecked { required = (totalEligible * quorumBps) / 10000; }
         require(prop.votesFor >= required, "Fridda: quorum not met");
 
         prop.executed = true;

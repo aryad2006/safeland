@@ -32,6 +32,11 @@ contract SafeLandNFT is
     bytes32 public constant JUSTICE_ROLE = keccak256("JUSTICE_ROLE");
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
 
+    // Hashes pré-calculés pour comparaisons de type d'encumbrance
+    bytes32 private constant _HYPOTHEQUE_HASH = keccak256("hypotheque");
+    bytes32 private constant _SAISIE_HASH = keccak256("saisie");
+    bytes32 private constant _SAFE_LOCK_HASH = keccak256("safe_lock");
+
     // ─── Structures ───────────────────────────────────────
     struct PropertyData {
         string titreFoncier;      // Numéro titre foncier ANCFCC
@@ -314,8 +319,8 @@ contract SafeLandNFT is
         _setTokenURI(tokenId, uri);
 
         // Restaurer les données de la propriété
+        prop.isActive = true;
         _properties[tokenId] = prop;
-        _properties[tokenId].isActive = true;
 
         _history[tokenId].push(TransactionRecord({
             from: previousOwner,
@@ -376,22 +381,24 @@ contract SafeLandNFT is
     // ─── Helpers internes ─────────────────────────────────
     function _isLockingEncumbrance(string calldata encType) private pure returns (bool) {
         bytes32 h = keccak256(bytes(encType));
-        return h == keccak256("hypotheque") || h == keccak256("saisie") || h == keccak256("safe_lock");
+        return h == _HYPOTHEQUE_HASH || h == _SAISIE_HASH || h == _SAFE_LOCK_HASH;
     }
 
     function _hasActiveLockingEncumbrance(uint256 tokenId) private view returns (bool) {
         Encumbrance[] storage encs = _encumbrances[tokenId];
-        for (uint256 i = 0; i < encs.length; i++) {
+        uint256 len = encs.length;
+        for (uint256 i = 0; i < len;) {
             if (encs[i].isActive && _isLockingEncumbranceStored(encs[i].encType)) {
                 return true;
             }
+            unchecked { ++i; }
         }
         return false;
     }
 
-    function _isLockingEncumbranceStored(string storage encType) private view returns (bool) {
+    function _isLockingEncumbranceStored(string storage encType) private pure returns (bool) {
         bytes32 h = keccak256(bytes(encType));
-        return h == keccak256("hypotheque") || h == keccak256("saisie") || h == keccak256("safe_lock");
+        return h == _HYPOTHEQUE_HASH || h == _SAISIE_HASH || h == _SAFE_LOCK_HASH;
     }
 
     function _exists(uint256 tokenId) internal view returns (bool) {

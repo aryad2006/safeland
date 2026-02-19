@@ -131,7 +131,7 @@ contract SafeLandJustice is
         require(!action.hasSigned[msg.sender], "Justice: already signed");
 
         action.hasSigned[msg.sender] = true;
-        action.signatures++;
+        unchecked { action.signatures++; }
 
         emit ActionSigned(actionId, msg.sender, action.signatures);
     }
@@ -144,25 +144,24 @@ contract SafeLandJustice is
 
         action.executed = true;
 
-        if (action.actionType == ActionType.Freeze) {
-            nftContract.freezeByJustice(action.tokenId, action.judgmentHash);
-        } else if (action.actionType == ActionType.BurnRemint) {
+        // Cache storage reads
+        uint256 tokenId = action.tokenId;
+        bytes32 judgmentHash = action.judgmentHash;
+        ActionType actionType = action.actionType;
+
+        if (actionType == ActionType.Freeze) {
+            nftContract.freezeByJustice(tokenId, judgmentHash);
+        } else {
+            // BurnRemint et SocialRecovery ont le même traitement
             nftContract.justiceOverride(
-                action.tokenId,
+                tokenId,
                 action.newOwner,
-                action.judgmentHash,
-                action.newUri
-            );
-        } else if (action.actionType == ActionType.SocialRecovery) {
-            nftContract.justiceOverride(
-                action.tokenId,
-                action.newOwner,
-                action.judgmentHash,
+                judgmentHash,
                 action.newUri
             );
         }
 
-        emit ActionExecuted(actionId, action.actionType, action.tokenId);
+        emit ActionExecuted(actionId, actionType, tokenId);
     }
 
     // ─── Social Recovery (Notaire / Conservateur) ─────────

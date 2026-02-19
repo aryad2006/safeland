@@ -13,6 +13,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 contract SafeLandRegistry is AccessControlUpgradeable, UUPSUpgradeable {
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
+    bytes32 private constant _JUSTICE_OVERRIDE_HASH = keccak256("justice_override");
 
     // ─── Statistiques ─────────────────────────────────────
     struct GlobalStats {
@@ -59,7 +60,7 @@ contract SafeLandRegistry is AccessControlUpgradeable, UUPSUpgradeable {
         _byCity[city].push(tokenId);
         _byOwner[owner].push(tokenId);
         _byType[propertyType].push(tokenId);
-        stats.totalProperties++;
+        unchecked { stats.totalProperties++; }
         emit PropertyRegistered(tokenId, city, propertyType, owner);
     }
 
@@ -71,10 +72,10 @@ contract SafeLandRegistry is AccessControlUpgradeable, UUPSUpgradeable {
     ) external onlyRole(OPERATOR_ROLE) {
         _removeFromOwner(from, tokenId);
         _byOwner[to].push(tokenId);
-        stats.totalTransactions++;
+        unchecked { stats.totalTransactions++; }
 
-        if (keccak256(bytes(txType)) == keccak256("justice_override")) {
-            stats.justicOverrides++;
+        if (keccak256(bytes(txType)) == _JUSTICE_OVERRIDE_HASH) {
+            unchecked { stats.justicOverrides++; }
         }
 
         emit TransactionRecorded(tokenId, from, to, txType);
@@ -83,7 +84,7 @@ contract SafeLandRegistry is AccessControlUpgradeable, UUPSUpgradeable {
     function recordFraudPrevented(uint256 tokenId, string calldata reason)
         external onlyRole(OPERATOR_ROLE)
     {
-        stats.fraudAttemptsPrevented++;
+        unchecked { stats.fraudAttemptsPrevented++; }
         emit FraudPrevented(tokenId, reason);
     }
 
@@ -107,12 +108,14 @@ contract SafeLandRegistry is AccessControlUpgradeable, UUPSUpgradeable {
     // ─── Interne ──────────────────────────────────────────
     function _removeFromOwner(address owner, uint256 tokenId) private {
         uint256[] storage arr = _byOwner[owner];
-        for (uint256 i = 0; i < arr.length; i++) {
+        uint256 len = arr.length;
+        for (uint256 i = 0; i < len;) {
             if (arr[i] == tokenId) {
-                arr[i] = arr[arr.length - 1];
+                arr[i] = arr[len - 1];
                 arr.pop();
                 return;
             }
+            unchecked { ++i; }
         }
     }
 

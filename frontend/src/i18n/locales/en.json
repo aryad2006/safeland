@@ -1,0 +1,222 @@
+{
+  "meta": {
+    "title": "SafeLand — Morocco Blockchain Land Registry",
+    "description": "Decentralized land management platform for the Kingdom of Morocco"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "properties": "Titles",
+    "escrow": "Escrow",
+    "fridda": "Fridda",
+    "justice": "Justice",
+    "stats": "Stats",
+    "connect": "Connect Wallet",
+    "disconnect": "Disconnect"
+  },
+  "hero": {
+    "tagline": "The Sovereign Blockchain Land Registry of the Kingdom of Morocco",
+    "subtitle": "Land security through NFTs • Automated fiscal escrow • Fridda succession • Multi-sig justice",
+    "cta": "Access the Platform",
+    "discover": "Discover",
+    "stats": {
+      "contracts": "Smart Contracts",
+      "coverage": "Test Coverage",
+      "tests": "Unit Tests",
+      "onchain": "On-Chain"
+    }
+  },
+  "problem": {
+    "label": "The Problem",
+    "title": "A land system vulnerable to fraud",
+    "items": [
+      "Falsification of paper land titles",
+      "Multiple sales of the same property",
+      "Blocked successions and family conflicts",
+      "Transaction opacity and corruption",
+      "Administrative delays of several months"
+    ]
+  },
+  "solution": {
+    "label": "The Solution",
+    "title": "SafeLand: trust through blockchain",
+    "items": [
+      "Unfalsifiable and traceable NFT land titles",
+      "Atomic escrow with automatic DGI/ANCFCC tax split",
+      "Fridda succession compliant with Islamic law (24 shares)",
+      "Multi-sig Justice Override for disputes",
+      "Instant and transparent transactions"
+    ]
+  },
+  "features": {
+    "label": "Architecture",
+    "title": "5 Sovereign Smart Contracts",
+    "subtitle": "A modular UUPS upgradeable architecture, compliant with OpenZeppelin v5 standards",
+    "modules": {
+      "nft": {
+        "title": "SafeLandNFT",
+        "subtitle": "ERC-721 — Land Titles",
+        "desc": "Each land title is a unique NFT with IPFS metadata: type, area, geolocation, document hash. Secure transfers with multi-role verification (Agent, Notary, Justice)."
+      },
+      "registry": {
+        "title": "SafeLandRegistry",
+        "subtitle": "Central Index",
+        "desc": "Global registry indexing all properties by city and owner. Real-time statistics: transactions, encumbrances, frauds prevented, judicial interventions."
+      },
+      "escrow": {
+        "title": "SafeLandEscrow",
+        "subtitle": "Atomic Fiscal Escrow",
+        "desc": "Atomic real estate transactions with automatic tax split: 4% DGI + 1% ANCFCC + 95% seller. Sequencing: creation → seller signature → buyer deposit → notary validation."
+      },
+      "fridda": {
+        "title": "SafeLandFridda",
+        "subtitle": "ERC-1155 — Successions",
+        "desc": "Succession engine compliant with Islamic law with 24 shares (fara'id). Automatic distribution, governance by heir proposals/votes, notarial finalization."
+      },
+      "justice": {
+        "title": "SafeLandJustice",
+        "subtitle": "Judicial Multi-Sig",
+        "desc": "Ministry of Justice interventions: judicial freeze, burn & remint (Justice Override), social key recovery. Configurable M-of-N threshold."
+      },
+      "security": {
+        "title": "Security",
+        "subtitle": "UUPS + AccessControl + ReentrancyGuard",
+        "desc": "Upgradeable contracts via UUPS proxy. Granular role-based access control (Admin, Agent, Notary, Judge, Conservator). Reentrancy protection on all critical functions."
+      }
+    }
+  },
+  "tech": {
+    "label": "Technologies",
+    "title": "Production Stack",
+    "items": {
+      "solidity": "Smart Contracts",
+      "openzeppelin": "Security",
+      "hardhat": "Build & Test",
+      "ipfs": "Decentralized Storage",
+      "nextjs": "Frontend",
+      "express": "API Backend",
+      "ethers": "Web3",
+      "docker": "Deployment"
+    }
+  },
+  "actors": {
+    "label": "Ecosystem",
+    "title": "Registry Actors",
+    "roles": {
+      "ancfcc": { "name": "ANCFCC", "desc": "Land Conservation — Registry Admin" },
+      "agent": { "name": "Land Agent", "desc": "Creation and management of NFT titles" },
+      "notary": { "name": "Notary", "desc": "Transaction and succession validation" },
+      "judge": { "name": "Judge", "desc": "Judicial freeze and Justice Override" },
+      "citizen": { "name": "Citizen", "desc": "Owner, buyer, heir" }
+    }
+  },
+  "cta": {
+    "title": "Ready to secure Moroccan land?",
+    "subtitle": "Connect your MetaMask wallet and explore the sovereign blockchain land registry.",
+    "button": "Launch SafeLand"
+  },
+  "footer": {
+    "tagline": "Sovereign Blockchain Land Registry",
+    "copyright": "© 2026 SafeLand Morocco — All rights reserved — EVM Blockchain"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome to SafeLand",
+    "totalProperties": "Total Properties",
+    "totalTransactions": "Total Transactions",
+    "fraudPrevented": "Frauds Prevented",
+    "justiceOverrides": "Justice Interventions",
+    "recentActivity": "Recent Activity",
+    "noData": "No data available"
+  },
+  "properties": {
+    "title": "Land Titles",
+    "create": "Create a Title",
+    "search": "Search...",
+    "titreFoncier": "Title Number",
+    "type": "Type",
+    "surface": "Area (m²)",
+    "city": "City",
+    "district": "District",
+    "owner": "Owner",
+    "status": "Status",
+    "active": "Active",
+    "frozen": "Frozen",
+    "locked": "Locked",
+    "details": "Details",
+    "history": "History",
+    "encumbrances": "Encumbrances",
+    "noProperties": "No properties registered"
+  },
+  "escrow": {
+    "title": "Escrow — Transactions",
+    "create": "New Transaction",
+    "dealId": "Deal #",
+    "tokenId": "Token ID",
+    "seller": "Seller",
+    "buyer": "Buyer",
+    "notary": "Notary",
+    "price": "Price",
+    "status": "Status",
+    "statuses": {
+      "Created": "Created",
+      "SellerSigned": "Seller Signed",
+      "BuyerFunded": "Funded",
+      "NotarySigned": "Notary Validated",
+      "Completed": "Completed",
+      "Cancelled": "Cancelled"
+    },
+    "fiscalSplit": "Fiscal Split",
+    "dgi": "DGI (4%)",
+    "ancfcc": "ANCFCC (1%)",
+    "sellerNet": "Seller Net (95%)"
+  },
+  "fridda": {
+    "title": "Fridda — Successions",
+    "openSuccession": "Open a Succession",
+    "dossierId": "File #",
+    "deceased": "Deceased Owner",
+    "totalShares": "Total Shares",
+    "heirs": "Heirs",
+    "finalized": "Finalized",
+    "pending": "Pending",
+    "proposals": "Proposals",
+    "vote": "Vote",
+    "for": "For",
+    "against": "Against",
+    "quorum": "Quorum"
+  },
+  "justice": {
+    "title": "Justice — Judicial Module",
+    "proposeAction": "Propose an Action",
+    "freeze": "Judicial Freeze",
+    "burnRemint": "Burn & Remint",
+    "socialRecovery": "Social Recovery",
+    "signatures": "Signatures",
+    "executed": "Executed",
+    "pending": "Pending",
+    "sign": "Sign",
+    "execute": "Execute"
+  },
+  "stats": {
+    "title": "Statistics",
+    "global": "Global Statistics",
+    "byCity": "By City",
+    "byType": "By Type"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "noData": "No data",
+    "connectWallet": "Please connect your wallet",
+    "txPending": "Transaction pending...",
+    "txSuccess": "Transaction confirmed!",
+    "txError": "Transaction failed"
+  }
+}

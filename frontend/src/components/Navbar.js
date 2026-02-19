@@ -1,22 +1,25 @@
 "use client";
 
 import { useWallet } from "@/context/WalletContext";
+import { useI18n } from "@/i18n";
 import { Menu, Shield, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import LanguageSwitcher from "./LanguageSwitcher";
 import NotificationBell from "./NotificationBell";
 
-const NAV_LINKS = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/properties", label: "Titres" },
-  { href: "/escrow", label: "Escrow" },
-  { href: "/fridda", label: "Fridda" },
-  { href: "/justice", label: "Justice" },
-  { href: "/stats", label: "Stats" },
+const NAV_KEYS = [
+  { href: "/dashboard", key: "nav.dashboard" },
+  { href: "/properties", key: "nav.properties" },
+  { href: "/escrow", key: "nav.escrow" },
+  { href: "/fridda", key: "nav.fridda" },
+  { href: "/justice", key: "nav.justice" },
+  { href: "/stats", key: "nav.stats" },
 ];
 
 export default function Navbar() {
   const { account, role, isConnected, connect, disconnect } = useWallet();
+  const { t } = useI18n();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -33,19 +36,20 @@ export default function Navbar() {
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-6">
-            {NAV_LINKS.map((link) => (
+            {NAV_KEYS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 className="text-sm font-medium text-gray-600 hover:text-safeland-700 transition-colors"
               >
-                {link.label}
+                {t(link.key)}
               </Link>
             ))}
           </div>
 
           {/* Wallet + Notifications */}
           <div className="hidden md:flex items-center gap-3">
+            <LanguageSwitcher />
             {isConnected && <NotificationBell />}
             {isConnected ? (
               <>
@@ -57,7 +61,7 @@ export default function Navbar() {
                   onClick={disconnect}
                   className="px-3 py-1.5 text-sm bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition"
                 >
-                  Déconnecter
+                  {t("nav.disconnect")}
                 </button>
               </>
             ) : (
@@ -65,7 +69,7 @@ export default function Navbar() {
                 onClick={connect}
                 className="px-4 py-2 text-sm bg-safeland-600 text-white rounded-lg hover:bg-safeland-700 transition font-medium"
               >
-                Connecter Wallet
+                {t("nav.connect")}
               </button>
             )}
           </div>
@@ -83,16 +87,19 @@ export default function Navbar() {
       {/* Mobile Nav */}
       {mobileOpen && (
         <div className="md:hidden border-t border-gray-200 bg-white py-4 px-4 space-y-3">
-          {NAV_LINKS.map((link) => (
+          {NAV_KEYS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               className="block text-sm font-medium text-gray-700 hover:text-safeland-600"
               onClick={() => setMobileOpen(false)}
             >
-              {link.label}
+              {t(link.key)}
             </Link>
           ))}
+          <div className="flex items-center gap-2 py-2">
+            <LanguageSwitcher />
+          </div>
           <div className="pt-3 border-t border-gray-100">
             {isConnected ? (
               <button
@@ -102,7 +109,7 @@ export default function Navbar() {
                 }}
                 className="w-full px-4 py-2 text-sm bg-red-50 text-red-700 rounded-lg"
               >
-                Déconnecter ({account.slice(0, 6)}...)
+                {t("nav.disconnect")} ({account.slice(0, 6)}...)
               </button>
             ) : (
               <button
@@ -112,7 +119,7 @@ export default function Navbar() {
                 }}
                 className="w-full px-4 py-2 text-sm bg-safeland-600 text-white rounded-lg font-medium"
               >
-                Connecter Wallet
+                {t("nav.connect")}
               </button>
             )}
           </div>

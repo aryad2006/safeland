@@ -390,4 +390,43 @@ describe("SafeLandEscrow", function () {
       expect(deal.status).to.equal(5); // Cancelled
     });
   });
+
+  // ─── Couverture branches double-init & authorizeUpgrade ─
+  describe("Branches sécurité avancées", function () {
+    it("devrait refuser un double appel à initialize()", async function () {
+      await expect(
+        escrow.connect(admin).initialize(admin.address, await nft.getAddress(), dgi.address, ancfcc.address)
+      ).to.be.reverted;
+    });
+
+    it("devrait refuser upgradeProxy par un non-admin", async function () {
+      const EscrowV2 = await ethers.getContractFactory("SafeLandEscrow", buyer);
+      await expect(
+        upgrades.upgradeProxy(await escrow.getAddress(), EscrowV2)
+      ).to.be.reverted;
+    });
+
+    it("devrait refuser pause par un non-admin", async function () {
+      await expect(
+        escrow.connect(buyer).pause()
+      ).to.be.reverted;
+    });
+
+    it("devrait refuser unpause par un non-admin", async function () {
+      await escrow.connect(admin).pause();
+      await expect(
+        escrow.connect(buyer).unpause()
+      ).to.be.reverted;
+    });
+
+    it("devrait refuser notaryComplete par un non-notaire (sans role)", async function () {
+      const docHash = ethers.keccak256(ethers.toUtf8Bytes("contrat"));
+      await escrow.connect(notary).createDeal(1, seller.address, buyer.address, SALE_PRICE, docHash);
+      await escrow.connect(seller).sellerSign(1);
+      await escrow.connect(buyer).buyerDeposit(1, { value: SALE_PRICE });
+      await expect(
+        escrow.connect(buyer).notaryComplete(1)
+      ).to.be.reverted;
+    });
+  });
 });

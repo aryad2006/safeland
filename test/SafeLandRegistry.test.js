@@ -162,4 +162,20 @@ describe("SafeLandRegistry", function () {
       expect(byOwner.length).to.equal(2);
     });
   });
+
+  // ─── Couverture branches double-init & authorizeUpgrade ─
+  describe("Branches sécurité avancées", function () {
+    it("devrait refuser un double appel à initialize()", async function () {
+      await expect(
+        registry.connect(admin).initialize(admin.address)
+      ).to.be.reverted;
+    });
+
+    it("devrait refuser upgradeProxy par un non-admin", async function () {
+      const RegistryV2 = await ethers.getContractFactory("SafeLandRegistry", user);
+      await expect(
+        upgrades.upgradeProxy(await registry.getAddress(), RegistryV2)
+      ).to.be.reverted;
+    });
+  });
 });

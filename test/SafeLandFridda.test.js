@@ -342,4 +342,34 @@ describe("SafeLandFridda", function () {
       ).to.be.reverted;
     });
   });
+
+  // ─── Couverture branches double-init & authorizeUpgrade ─
+  describe("Branches sécurité avancées", function () {
+    beforeEach(async function () {
+      const h = ethers.keccak256(ethers.toUtf8Bytes("acte"));
+      await fridda.connect(notary).openSuccession(42, admin.address, 24, h, h);
+      await fridda.connect(notary).distributeShares(1, [heir1.address, heir2.address, heir3.address], [3, 14, 7]);
+      await fridda.connect(notary).finalizeSuccession(1);
+    });
+
+    it("devrait refuser un double appel à initialize()", async function () {
+      await expect(
+        fridda.connect(admin).initialize(admin.address, "https://safeland.ma/api/fridda/{id}")
+      ).to.be.reverted;
+    });
+
+    it("devrait refuser upgradeProxy par un non-admin", async function () {
+      const FriddaV2 = await ethers.getContractFactory("SafeLandFridda", heir1);
+      await expect(
+        upgrades.upgradeProxy(await fridda.getAddress(), FriddaV2)
+      ).to.be.reverted;
+    });
+
+    it("devrait refuser executeProposal par un non-notaire", async function () {
+      await fridda.connect(heir1).createProposal(1, 0, "vente", 5000, 7);
+      await expect(
+        fridda.connect(heir1).executeProposal(1)
+      ).to.be.reverted;
+    });
+  });
 });

@@ -60,8 +60,8 @@ git commit -m "feat: Docker fixes, Justice API, i18n locales étendues, standalo
 5. **Dashboard i18n** — page dashboard utilise `t()` partout
 
 ### 🔄 Reste à faire :
-1. **i18n des 5 pages restantes** — escrow, fridda, justice, properties, stats → remplacer les strings hardcodées par `t()`. Les clés de traduction sont DÉJÀ dans les 3 fichiers JSON.
-2. **Page Justice** — actuellement utilise `useContracts` (blockchain directe). Incohérence archi : les autres pages passent par l'API backend. Décision : soit migrer vers apiCall() (cohérent), soit laisser en l'état (fonctionnel).
+1. ~~**i18n des 5 pages restantes**~~ ✅ FAIT (commit `376e7e5`) — toasts, labels fees, labels stats, label dossier tous traduits
+2. ~~**Page Justice**~~ ✅ DÉJÀ FAIT — utilisait déjà `apiCall()`, cohérent avec le reste
 3. **Branch coverage** — 69% branches (81 non testées). Principalement les false-paths des require/revert. Contrats les plus déficitaires : SafeLandNFT (34), SafeLandEscrow (21), SafeLandFridda (18).
 4. **Input validation backend** — les routes ne valident que la présence des champs, pas le format.
 

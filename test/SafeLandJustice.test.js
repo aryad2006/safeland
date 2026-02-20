@@ -261,4 +261,20 @@ describe("SafeLandJustice", function () {
       ).to.be.reverted;
     });
   });
+
+  // ─── Couverture branches double-init & authorizeUpgrade ─
+  describe("Branches sécurité avancées", function () {
+    it("devrait refuser un double appel à initialize()", async function () {
+      await expect(
+        justice.connect(admin).initialize(admin.address, await nft.getAddress(), 2)
+      ).to.be.reverted;
+    });
+
+    it("devrait refuser upgradeProxy par un non-admin", async function () {
+      const JusticeV2 = await ethers.getContractFactory("SafeLandJustice", owner1);
+      await expect(
+        upgrades.upgradeProxy(await justice.getAddress(), JusticeV2)
+      ).to.be.reverted;
+    });
+  });
 });

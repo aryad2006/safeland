@@ -547,4 +547,66 @@ describe("SafeLandNFT", function () {
       expect(await nft.ownerOf(1)).to.equal(owner2.address);
     });
   });
+
+  // ─── Couverture branches double-init & authorizeUpgrade ─
+  describe("Branches sécurité avancées", function () {
+    beforeEach(async function () {
+      await createDefaultProperty();
+    });
+
+    it("devrait refuser un double appel à initialize()", async function () {
+      await expect(
+        nft.connect(admin).initialize(admin.address)
+      ).to.be.reverted;
+    });
+
+    it("devrait refuser upgradeProxy par un non-UPGRADER_ROLE", async function () {
+      const NFTv2 = await ethers.getContractFactory("SafeLandNFT", owner1);
+      await expect(
+        upgrades.upgradeProxy(await nft.getAddress(), NFTv2)
+      ).to.be.reverted;
+    });
+
+    it("devrait refuser transferProperty par un non-agent", async function () {
+      const docHash = ethers.keccak256(ethers.toUtf8Bytes("doc"));
+      await expect(
+        nft.connect(owner1).transferProperty(1, owner2.address, "sale", docHash, admin.address)
+      ).to.be.reverted;
+    });
+
+    it("devrait tester _isLockingEncumbranceStored avec saisie restante", async function () {
+      // Ajouter servitude (non-bloquante) + saisie (bloquante)
+      await nft.connect(agent).addEncumbrance(1, "servitude", notary.address, 0, 0);
+      await nft.connect(agent).addEncumbrance(1, "saisie", notary.address, 0, 0);
+      expect(await nft.canTransfer(1)).to.be.false;
+      // Retirer servitude → _hasActiveLockingEncumbrance vérifie saisie via _isLockingEncumbranceStored
+      await nft.connect(agent).removeEncumbrance(1, 0);
+      expect(await nft.canTransfer(1)).to.be.false; // saisie encore active
+      // Retirer saisie
+      await nft.connect(agent).removeEncumbrance(1, 1);
+      expect(await nft.canTransfer(1)).to.be.true;
+    });
+
+    it("devrait tester _isLockingEncumbranceStored avec safe_lock restante", async function () {
+      // Ajouter servitude (non-bloquante) + safe_lock (bloquante)
+      await nft.connect(agent).addEncumbrance(1, "servitude", notary.address, 0, 0);
+      await nft.connect(agent).addEncumbrance(1, "safe_lock", notary.address, 0, 0);
+      expect(await nft.canTransfer(1)).to.be.false;
+      // Retirer servitude → _hasActiveLockingEncumbrance vérifie safe_lock
+      await nft.connect(agent).removeEncumbrance(1, 0);
+      expect(await nft.canTransfer(1)).to.be.false; // safe_lock encore active
+      await nft.connect(agent).removeEncumbrance(1, 1);
+      expect(await nft.canTransfer(1)).to.be.true;
+    });
+
+    it("devrait tester la branche hypotheque seule via _isLockingEncumbranceStored", async function () {
+      // Ajouter hypotheque seule puis servitude, retirer la servitude
+      await nft.connect(agent).addEncumbrance(1, "hypotheque", notary.address, ethers.parseEther("50"), 0);
+      await nft.connect(agent).addEncumbrance(1, "servitude", notary.address, 0, 0);
+      expect(await nft.canTransfer(1)).to.be.false;
+      // Retirer servitude → _isLockingEncumbranceStored("hypotheque") → h == _HYPOTHEQUE_HASH true
+      await nft.connect(agent).removeEncumbrance(1, 1);
+      expect(await nft.canTransfer(1)).to.be.false;
+    });
+  });
 });

@@ -62,7 +62,7 @@ git commit -m "feat: Docker fixes, Justice API, i18n locales étendues, standalo
 ### 🔄 Reste à faire :
 1. ~~**i18n des 5 pages restantes**~~ ✅ FAIT (commit `376e7e5`) — toasts, labels fees, labels stats, label dossier tous traduits
 2. ~~**Page Justice**~~ ✅ DÉJÀ FAIT — utilisait déjà `apiCall()`, cohérent avec le reste
-3. **Branch coverage** — 69% branches (81 non testées). Principalement les false-paths des require/revert. Contrats les plus déficitaires : SafeLandNFT (34), SafeLandEscrow (21), SafeLandFridda (18).
+3. ~~**Branch coverage**~~ ✅ AMÉLIORÉ (commit `3088c93`) — 89% → 96% branches, 181 tests. Registry 100%. Restant : nonReentrant modifier false-paths (nécessitent contrats attaquants).
 4. **Input validation backend** — les routes ne valident que la présence des champs, pas le format.
 
 ---

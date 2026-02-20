@@ -195,7 +195,8 @@
     "cityPlaceholder": "City",
     "gpsPlaceholder": "GPS coordinates (lat,lng)",
     "docHashPlaceholder": "IPFS document hash (QmXxx...)",
-    "createNftBtn": "Create NFT Title"
+    "createNftBtn": "Create NFT Title",
+    "toastTitleCreated": "Title created — Token #"
   },
   "escrow": {
     "title": "Escrow - Secure Transactions",
@@ -237,7 +238,11 @@
     "sellerPlaceholder": "Seller address (0x...)",
     "buyerPlaceholder": "Buyer address (0x...)",
     "createDealBtn": "Create Deal",
-    "createdAt": "Created on:"
+    "createdAt": "Created on:",
+    "toastDealCreated": "Deal created — ID #",
+    "dgiFeeLabel": "DGI",
+    "ancfccFeeLabel": "ANCFCC",
+    "sellerAmountLabel": "Seller"
   },
   "fridda": {
     "title": "Fridda - Successions",
@@ -286,7 +291,10 @@
     "descriptionPlaceholder": "Description",
     "quorumPlaceholder": "Quorum (bps, default 5000 = 50%)",
     "durationPlaceholder": "Duration (days, default 7)",
-    "submitProposal": "Submit Proposal"
+    "submitProposal": "Submit Proposal",
+    "toastDossierCreated": "Succession file created — ID #",
+    "toastProposalCreated": "Proposal created — ID #",
+    "dossierNumber": "File"
   },
   "justice": {
     "title": "Justice - Judicial Module",
@@ -334,7 +342,8 @@
     "recoveryFormTitle": "Social Recovery (lost key)",
     "recoveryFormDesc": "If you lost access to your wallet, submit a recovery request. A judge will need to validate the procedure.",
     "newWalletPlaceholder": "New wallet (0x...)",
-    "requestRecovery": "Request recovery"
+    "requestRecovery": "Request recovery",
+    "actionsCount": "action(s)"
   },
   "stats": {
     "title": "Statistics",
@@ -349,7 +358,12 @@
     "network": "Sovereign Private Consortium - hosted in Morocco",
     "contractsInfo": "5 UUPS Upgradeable smart contracts (ERC-721 + ERC-1155)",
     "compliance": "Law 43-20 (trust services), CNDP, Bank Al-Maghrib",
-    "sla": "99.9% availability, RPO < 5 min, RTO < 30 min"
+    "sla": "99.9% availability, RPO < 5 min, RTO < 30 min",
+    "consensusLabel": "Consensus",
+    "networkLabel": "Network",
+    "contractsLabel": "Contracts",
+    "complianceLabel": "Compliance",
+    "slaLabel": "SLA"
   },
   "common": {
     "loading": "Loading...",

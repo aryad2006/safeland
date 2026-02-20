@@ -180,7 +180,8 @@
     "cityPlaceholder": "Ville",
     "gpsPlaceholder": "Coordonnées GPS (lat,lng)",
     "docHashPlaceholder": "Hash document IPFS (QmXxx...)",
-    "createNftBtn": "Créer le Titre NFT"
+    "createNftBtn": "Créer le Titre NFT",
+    "toastTitleCreated": "Titre créé — Token #"
   },
   "escrow": {
     "title": "Escrow — Transactions Sécurisées",
@@ -222,7 +223,11 @@
     "sellerPlaceholder": "Adresse vendeur (0x...)",
     "buyerPlaceholder": "Adresse acheteur (0x...)",
     "createDealBtn": "Créer le Deal",
-    "createdAt": "Créé le :"
+    "createdAt": "Créé le :",
+    "toastDealCreated": "Deal créé — ID #",
+    "dgiFeeLabel": "DGI",
+    "ancfccFeeLabel": "ANCFCC",
+    "sellerAmountLabel": "Vendeur"
   },
   "fridda": {
     "title": "Fridda — Successions",
@@ -271,7 +276,10 @@
     "descriptionPlaceholder": "Description",
     "quorumPlaceholder": "Quorum (bps, défaut 5000 = 50%)",
     "durationPlaceholder": "Durée (jours, défaut 7)",
-    "submitProposal": "Soumettre la Proposition"
+    "submitProposal": "Soumettre la Proposition",
+    "toastDossierCreated": "Dossier de succession créé — ID #",
+    "toastProposalCreated": "Proposition créée — ID #",
+    "dossierNumber": "Dossier"
   },
   "justice": {
     "title": "Justice — Module Judiciaire",
@@ -319,7 +327,8 @@
     "recoveryFormTitle": "Récupération Sociale (perte de clé)",
     "recoveryFormDesc": "Si vous avez perdu l'accès à votre wallet, soumettez une demande de récupération. Un juge devra valider la procédure.",
     "newWalletPlaceholder": "Nouveau wallet (0x...)",
-    "requestRecovery": "Demander la récupération"
+    "requestRecovery": "Demander la récupération",
+    "actionsCount": "action(s)"
   },
   "stats": {
     "title": "Statistiques",
@@ -334,7 +343,12 @@
     "network": "Consortium Privé Souverain — hébergé au Maroc",
     "contractsInfo": "5 smart contracts UUPS Upgradeable (ERC-721 + ERC-1155)",
     "compliance": "Loi 43-20 (services de confiance), CNDP, Bank Al-Maghrib",
-    "sla": "99,9% disponibilité, RPO < 5 min, RTO < 30 min"
+    "sla": "99,9% disponibilité, RPO < 5 min, RTO < 30 min",
+    "consensusLabel": "Consensus",
+    "networkLabel": "Réseau",
+    "contractsLabel": "Contrats",
+    "complianceLabel": "Conformité",
+    "slaLabel": "SLA"
   },
   "common": {
     "loading": "Chargement...",

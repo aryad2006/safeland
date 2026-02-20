@@ -180,7 +180,8 @@
     "cityPlaceholder": "المدينة",
     "gpsPlaceholder": "إحداثيات GPS (lat,lng)",
     "docHashPlaceholder": "هاش وثيقة IPFS (QmXxx...)",
-    "createNftBtn": "إنشاء سند NFT"
+    "createNftBtn": "إنشاء سند NFT",
+    "toastTitleCreated": "تم إنشاء السند — رمز #"
   },
   "escrow": {
     "title": "الضمان — معاملات آمنة",
@@ -222,7 +223,11 @@
     "sellerPlaceholder": "عنوان البائع (0x...)",
     "buyerPlaceholder": "عنوان المشتري (0x...)",
     "createDealBtn": "إنشاء الصفقة",
-    "createdAt": "تاريخ الإنشاء :"
+    "createdAt": "تاريخ الإنشاء :",
+    "toastDealCreated": "تم إنشاء الصفقة — رقم #",
+    "dgiFeeLabel": "DGI",
+    "ancfccFeeLabel": "ANCFCC",
+    "sellerAmountLabel": "البائع"
   },
   "fridda": {
     "title": "الفريضة — الإرث",
@@ -271,7 +276,10 @@
     "descriptionPlaceholder": "الوصف",
     "quorumPlaceholder": "النصاب (bps، افتراضي 5000 = 50%)",
     "durationPlaceholder": "المدة (أيام، افتراضي 7)",
-    "submitProposal": "تقديم الاقتراح"
+    "submitProposal": "تقديم الاقتراح",
+    "toastDossierCreated": "تم إنشاء ملف الإرث — رقم #",
+    "toastProposalCreated": "تم إنشاء الاقتراح — رقم #",
+    "dossierNumber": "ملف"
   },
   "justice": {
     "title": "العدالة — الوحدة القضائية",
@@ -319,7 +327,8 @@
     "recoveryFormTitle": "استرجاع اجتماعي (فقدان المفتاح)",
     "recoveryFormDesc": "إذا فقدت الوصول إلى محفظتك، قدم طلب استرجاع. يجب على قاضٍ التحقق من الإجراء.",
     "newWalletPlaceholder": "محفظة جديدة (0x...)",
-    "requestRecovery": "طلب الاسترجاع"
+    "requestRecovery": "طلب الاسترجاع",
+    "actionsCount": "إجراء(ات)"
   },
   "stats": {
     "title": "الإحصائيات",
@@ -334,7 +343,12 @@
     "network": "كونسورتيوم خاص سيادي — مستضاف في المغرب",
     "contractsInfo": "5 عقود ذكية UUPS قابلة للترقية (ERC-721 + ERC-1155)",
     "compliance": "قانون 43-20 (خدمات الثقة)، CNDP، بنك المغرب",
-    "sla": "99.9% توفر، RPO < 5 دقائق، RTO < 30 دقيقة"
+    "sla": "99.9% توفر، RPO < 5 دقائق، RTO < 30 دقيقة",
+    "consensusLabel": "الإجماع",
+    "networkLabel": "الشبكة",
+    "contractsLabel": "العقود",
+    "complianceLabel": "الامتثال",
+    "slaLabel": "SLA"
   },
   "common": {
     "loading": "جاري التحميل...",

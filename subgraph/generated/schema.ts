@@ -1924,6 +1924,222 @@ export class Recovery extends Entity {
   }
 }
 
+export class TimelockOperation extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save TimelockOperation entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.STRING,
+        `Entities of type TimelockOperation must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`,
+      );
+      store.set("TimelockOperation", id.toString(), this);
+    }
+  }
+
+  static loadInBlock(id: string): TimelockOperation | null {
+    return changetype<TimelockOperation | null>(
+      store.get_in_block("TimelockOperation", id),
+    );
+  }
+
+  static load(id: string): TimelockOperation | null {
+    return changetype<TimelockOperation | null>(
+      store.get("TimelockOperation", id),
+    );
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toString();
+    }
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get target(): Bytes {
+    let value = this.get("target");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBytes();
+    }
+  }
+
+  set target(value: Bytes) {
+    this.set("target", Value.fromBytes(value));
+  }
+
+  get value(): BigInt {
+    let value = this.get("value");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set value(value: BigInt) {
+    this.set("value", Value.fromBigInt(value));
+  }
+
+  get description(): string {
+    let value = this.get("description");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toString();
+    }
+  }
+
+  set description(value: string) {
+    this.set("description", Value.fromString(value));
+  }
+
+  get readyTimestamp(): BigInt {
+    let value = this.get("readyTimestamp");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set readyTimestamp(value: BigInt) {
+    this.set("readyTimestamp", Value.fromBigInt(value));
+  }
+
+  get status(): string {
+    let value = this.get("status");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toString();
+    }
+  }
+
+  set status(value: string) {
+    this.set("status", Value.fromString(value));
+  }
+
+  get proposer(): Bytes {
+    let value = this.get("proposer");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBytes();
+    }
+  }
+
+  set proposer(value: Bytes) {
+    this.set("proposer", Value.fromBytes(value));
+  }
+
+  get scheduledAt(): BigInt {
+    let value = this.get("scheduledAt");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set scheduledAt(value: BigInt) {
+    this.set("scheduledAt", Value.fromBigInt(value));
+  }
+
+  get scheduledTx(): Bytes {
+    let value = this.get("scheduledTx");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBytes();
+    }
+  }
+
+  set scheduledTx(value: Bytes) {
+    this.set("scheduledTx", Value.fromBytes(value));
+  }
+
+  get executedAt(): BigInt | null {
+    let value = this.get("executedAt");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set executedAt(value: BigInt | null) {
+    if (!value) {
+      this.unset("executedAt");
+    } else {
+      this.set("executedAt", Value.fromBigInt(<BigInt>value));
+    }
+  }
+
+  get executedTx(): Bytes | null {
+    let value = this.get("executedTx");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBytes();
+    }
+  }
+
+  set executedTx(value: Bytes | null) {
+    if (!value) {
+      this.unset("executedTx");
+    } else {
+      this.set("executedTx", Value.fromBytes(<Bytes>value));
+    }
+  }
+
+  get cancelledAt(): BigInt | null {
+    let value = this.get("cancelledAt");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set cancelledAt(value: BigInt | null) {
+    if (!value) {
+      this.unset("cancelledAt");
+    } else {
+      this.set("cancelledAt", Value.fromBigInt(<BigInt>value));
+    }
+  }
+
+  get cancelledTx(): Bytes | null {
+    let value = this.get("cancelledTx");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBytes();
+    }
+  }
+
+  set cancelledTx(value: Bytes | null) {
+    if (!value) {
+      this.unset("cancelledTx");
+    } else {
+      this.set("cancelledTx", Value.fromBytes(<Bytes>value));
+    }
+  }
+}
+
 export class GlobalStat extends Entity {
   constructor(id: string) {
     super();
@@ -2052,6 +2268,19 @@ export class GlobalStat extends Entity {
 
   set totalFraudAlerts(value: i32) {
     this.set("totalFraudAlerts", Value.fromI32(value));
+  }
+
+  get totalTimelockOps(): i32 {
+    let value = this.get("totalTimelockOps");
+    if (!value || value.kind == ValueKind.NULL) {
+      return 0;
+    } else {
+      return value.toI32();
+    }
+  }
+
+  set totalTimelockOps(value: i32) {
+    this.set("totalTimelockOps", Value.fromI32(value));
   }
 }
 

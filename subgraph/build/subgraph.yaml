@@ -22,7 +22,7 @@ dataSources:
         - GlobalStat
       abis:
         - name: SafeLandNFT
-          file: SafeLandNFT/abis/SafeLandNFT.json
+          file: SafeLandNFT\abis\SafeLandNFT.json
       eventHandlers:
         - event: PropertyCreated(indexed uint256,string,address,address)
           handler: handlePropertyCreated
@@ -40,7 +40,7 @@ dataSources:
           handler: handlePropertyFrozen
         - event: PropertyBurned(indexed uint256,bytes32)
           handler: handlePropertyBurned
-      file: SafeLandNFT/SafeLandNFT.wasm
+      file: SafeLandNFT\SafeLandNFT.wasm
   - kind: ethereum/contract
     name: SafeLandRegistry
     network: sepolia
@@ -58,7 +58,7 @@ dataSources:
         - FraudAlert
       abis:
         - name: SafeLandRegistry
-          file: SafeLandRegistry/abis/SafeLandRegistry.json
+          file: SafeLandRegistry\abis\SafeLandRegistry.json
       eventHandlers:
         - event: PropertyRegistered(indexed uint256,string,string,address)
           handler: handlePropertyRegistered
@@ -66,7 +66,7 @@ dataSources:
           handler: handleTransactionRecorded
         - event: FraudPrevented(indexed uint256,string)
           handler: handleFraudPrevented
-      file: SafeLandRegistry/SafeLandRegistry.wasm
+      file: SafeLandRegistry\SafeLandRegistry.wasm
   - kind: ethereum/contract
     name: SafeLandEscrow
     network: sepolia
@@ -83,7 +83,7 @@ dataSources:
         - GlobalStat
       abis:
         - name: SafeLandEscrow
-          file: SafeLandEscrow/abis/SafeLandEscrow.json
+          file: SafeLandEscrow\abis\SafeLandEscrow.json
       eventHandlers:
         - event: DealCreated(indexed uint256,indexed uint256,address,address,uint256)
           handler: handleDealCreated
@@ -97,7 +97,7 @@ dataSources:
           handler: handleDealCompleted
         - event: DealCancelled(indexed uint256,string)
           handler: handleDealCancelled
-      file: SafeLandEscrow/SafeLandEscrow.wasm
+      file: SafeLandEscrow\SafeLandEscrow.wasm
   - kind: ethereum/contract
     name: SafeLandFridda
     network: sepolia
@@ -116,7 +116,7 @@ dataSources:
         - GlobalStat
       abis:
         - name: SafeLandFridda
-          file: SafeLandFridda/abis/SafeLandFridda.json
+          file: SafeLandFridda\abis\SafeLandFridda.json
       eventHandlers:
         - event: SuccessionOpened(indexed uint256,indexed uint256,address)
           handler: handleSuccessionOpened
@@ -130,7 +130,7 @@ dataSources:
           handler: handleVoteCast
         - event: ProposalExecuted(indexed uint256)
           handler: handleProposalExecuted
-      file: SafeLandFridda/SafeLandFridda.wasm
+      file: SafeLandFridda\SafeLandFridda.wasm
   - kind: ethereum/contract
     name: SafeLandJustice
     network: sepolia
@@ -149,7 +149,7 @@ dataSources:
         - GlobalStat
       abis:
         - name: SafeLandJustice
-          file: SafeLandJustice/abis/SafeLandJustice.json
+          file: SafeLandJustice\abis\SafeLandJustice.json
       eventHandlers:
         - event: ActionProposed(indexed uint256,uint8,uint256,address)
           handler: handleActionProposed
@@ -161,4 +161,29 @@ dataSources:
           handler: handleRecoveryRequested
         - event: RecoveryExecuted(indexed uint256,uint256,address)
           handler: handleRecoveryExecuted
-      file: SafeLandJustice/SafeLandJustice.wasm
+      file: SafeLandJustice\SafeLandJustice.wasm
+  - kind: ethereum/contract
+    name: SafeLandTimelock
+    network: sepolia
+    source:
+      address: "0x0000000000000000000000000000000000000000"
+      abi: SafeLandTimelock
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - TimelockOperation
+        - GlobalStat
+      abis:
+        - name: SafeLandTimelock
+          file: SafeLandTimelock\abis\SafeLandTimelock.json
+      eventHandlers:
+        - event: OperationScheduled(indexed bytes32,indexed address,uint256,bytes,uint256,string)
+          handler: handleOperationScheduled
+        - event: OperationExecuted(indexed bytes32,indexed address,uint256,bytes)
+          handler: handleOperationExecuted
+        - event: OperationCancelled(indexed bytes32)
+          handler: handleOperationCancelled
+      file: SafeLandTimelock\SafeLandTimelock.wasm

@@ -9,6 +9,11 @@ import SafeLandFriddaArtifact from "@/contracts/SafeLandFridda.json";
 import SafeLandJusticeArtifact from "@/contracts/SafeLandJustice.json";
 import SafeLandNFTArtifact from "@/contracts/SafeLandNFT.json";
 import SafeLandRegistryArtifact from "@/contracts/SafeLandRegistry.json";
+import SafeLandTimelockArtifact from "@/contracts/SafeLandTimelock.json";
+
+// Adresses des contrats : priorité env vars > artefact compilé
+const addr = (envVar, artifact) =>
+  process.env[envVar] || artifact.address || undefined;
 
 /**
  * Hook fournissant les instances de contrats connectées au signer (écriture)
@@ -23,32 +28,19 @@ export function useContracts() {
     // Pour les lectures, on utilise le provider ; pour les écritures, le signer
     const signerOrProvider = signer || provider;
 
+    const makeContract = (envKey, artifact) => {
+      const address = addr(envKey, artifact);
+      if (!address) return null;
+      return new ethers.Contract(address, artifact.abi, signerOrProvider);
+    };
+
     return {
-      nft: new ethers.Contract(
-        SafeLandNFTArtifact.address,
-        SafeLandNFTArtifact.abi,
-        signerOrProvider
-      ),
-      registry: new ethers.Contract(
-        SafeLandRegistryArtifact.address,
-        SafeLandRegistryArtifact.abi,
-        signerOrProvider
-      ),
-      escrow: new ethers.Contract(
-        SafeLandEscrowArtifact.address,
-        SafeLandEscrowArtifact.abi,
-        signerOrProvider
-      ),
-      fridda: new ethers.Contract(
-        SafeLandFriddaArtifact.address,
-        SafeLandFriddaArtifact.abi,
-        signerOrProvider
-      ),
-      justice: new ethers.Contract(
-        SafeLandJusticeArtifact.address,
-        SafeLandJusticeArtifact.abi,
-        signerOrProvider
-      ),
+      nft:      makeContract("NEXT_PUBLIC_NFT_ADDRESS",      SafeLandNFTArtifact),
+      registry: makeContract("NEXT_PUBLIC_REGISTRY_ADDRESS", SafeLandRegistryArtifact),
+      escrow:   makeContract("NEXT_PUBLIC_ESCROW_ADDRESS",   SafeLandEscrowArtifact),
+      fridda:   makeContract("NEXT_PUBLIC_FRIDDA_ADDRESS",   SafeLandFriddaArtifact),
+      justice:  makeContract("NEXT_PUBLIC_JUSTICE_ADDRESS",  SafeLandJusticeArtifact),
+      timelock: makeContract("NEXT_PUBLIC_TIMELOCK_ADDRESS", SafeLandTimelockArtifact),
     };
   }, [provider, signer]);
 

@@ -92,6 +92,29 @@ jobs:
         env:
           NEXT_PUBLIC_API_URL: http://localhost:3001/api
 
+  # ─── Subgraph Codegen ─────────────────────────────────
+  subgraph:
+    name: Subgraph Codegen + Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: subgraph/package-lock.json
+
+      - name: Install subgraph dependencies
+        run: cd subgraph && npm ci
+
+      - name: Graph codegen
+        run: cd subgraph && npx graph codegen
+
+      - name: Graph build
+        run: cd subgraph && npx graph build
+
   # ─── Security Audit ───────────────────────────────────
   security:
     name: Security Audit

@@ -13,6 +13,7 @@
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
     "seed": "npx hardhat run scripts/seed.js --network localhost",
+    "sync-abis": "node scripts/sync-abis.js",
     "update-env": "node scripts/update-env.js",
     "update-env:write": "node scripts/update-env.js --write",
     "lint:sol": "npx solhint 'contracts/**/*.sol'",

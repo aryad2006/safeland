@@ -165,6 +165,94 @@ const options = {
             finalized: { type: "boolean" },
           },
         },
+        // ─── Timelock ──────────────────────────────────────
+        TimelockScheduleRequest: {
+          type: "object",
+          required: ["target", "value", "data", "predecessor", "salt", "delay"],
+          properties: {
+            target:      { type: "string", description: "Adresse du contrat cible" },
+            value:       { type: "string", description: "Valeur ETH (en wei)", example: "0" },
+            data:        { type: "string", description: "Calldata encodé en hex" },
+            predecessor: { type: "string", description: "ID de l'opération précédente (0x00 si aucune)" },
+            salt:        { type: "string", description: "Salt aléatoire 32 bytes en hex" },
+            delay:       { type: "integer", description: "Délai en secondes", example: 86400 },
+          },
+        },
+        TimelockBatchRequest: {
+          type: "object",
+          required: ["targets", "values", "payloads", "predecessor", "salt", "delay"],
+          properties: {
+            targets:     { type: "array", items: { type: "string" } },
+            values:      { type: "array", items: { type: "string" } },
+            payloads:    { type: "array", items: { type: "string" } },
+            predecessor: { type: "string" },
+            salt:        { type: "string" },
+            delay:       { type: "integer" },
+          },
+        },
+        TimelockOperationResponse: {
+          type: "object",
+          properties: {
+            message:   { type: "string" },
+            txHash:    { type: "string" },
+            operationId: { type: "string", description: "keccak256 de la proposition" },
+          },
+        },
+        TimelockStatusResponse: {
+          type: "object",
+          properties: {
+            operationId: { type: "string" },
+            status: { type: "string", enum: ["unknown", "pending", "ready", "done"] },
+            timestamp: { type: "integer", description: "Timestamp d'exécution possible (unix)" },
+          },
+        },
+        // ─── Bank ──────────────────────────────────────────────
+        BankScoreResponse: {
+          type: "object",
+          properties: {
+            tokenId:    { type: "string" },
+            scoreClass: { type: "string", enum: ["A", "B", "C", "D", "E"] },
+            ltv:        { type: "number",  description: "Loan-to-value ratio", example: 0.7 },
+            maxLoan:    { type: "string",  description: "Montant maximum empruntable en ETH" },
+            surface:    { type: "string" },
+            city:       { type: "string" },
+            propertyType: { type: "string" },
+          },
+        },
+        BankHypothequeRequest: {
+          type: "object",
+          required: ["tokenId", "bankAddress", "loanAmount"],
+          properties: {
+            tokenId:     { type: "string" },
+            bankAddress: { type: "string", description: "Adresse du contrat/compte bancaire" },
+            loanAmount:  { type: "string", description: "Montant emprunté en ETH", example: "5.0" },
+          },
+        },
+        BankHypothequeResponse: {
+          type: "object",
+          properties: {
+            message:   { type: "string" },
+            txHash:    { type: "string" },
+            tokenId:   { type: "string" },
+            bankAddress: { type: "string" },
+            loanAmount:  { type: "string" },
+          },
+        },
+        BankStatusResponse: {
+          type: "object",
+          properties: {
+            tokenId:  { type: "string" },
+            locked:   { type: "boolean" },
+            hypotheque: {
+              type: "object",
+              properties: {
+                bank:    { type: "string" },
+                amount:  { type: "string" },
+                active:  { type: "boolean" },
+              },
+            },
+          },
+        },
         // ─── Common ────────────────────────────────────────
         Error: {
           type: "object",
@@ -187,7 +275,9 @@ const options = {
       { name: "Properties", description: "Gestion des titres fonciers NFT (ERC-721)" },
       { name: "Escrow", description: "Transactions sécurisées avec split fiscal automatique" },
       { name: "Fridda", description: "Successions — distribution de parts ERC-1155 et gouvernance" },
-      { name: "IPFS", description: "Upload et récupération de documents sur IPFS" },
+      { name: "IPFS",     description: "Upload et récupération de documents sur IPFS" },
+      { name: "Timelock", description: "Gouvernance différée — schedule / execute / cancel opérations admin" },
+      { name: "Bank B2B", description: "Interface bancaire — scoring LTV, hypothèques et MAINLEVÉE" },
     ],
   },
   apis: ["./src/routes/*.js"],

@@ -80,6 +80,14 @@ function getContracts() {
     );
   }
 
+  if (addresses.SafeLandTimelock) {
+    contracts.timelock = new ethers.Contract(
+      addresses.SafeLandTimelock,
+      loadABI("SafeLandTimelock"),
+      signer
+    );
+  }
+
   return contracts;
 }
 

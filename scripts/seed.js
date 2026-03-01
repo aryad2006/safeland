@@ -25,6 +25,10 @@ async function main() {
   const Fridda = await ethers.getContractAt("SafeLandFridda", addresses.SafeLandFridda);
   const Justice = await ethers.getContractAt("SafeLandJustice", addresses.SafeLandJustice);
 
+  const Timelock = addresses.SafeLandTimelock
+    ? await ethers.getContractAt("SafeLandTimelock", addresses.SafeLandTimelock)
+    : null;
+
   // ── Rôles ─────────────────────────────────────────────────
   const AGENT_ROLE = await NFT.AGENT_ROLE();
   const NOTARY_ROLE = await NFT.NOTARY_ROLE();
@@ -245,6 +249,42 @@ async function main() {
   } catch (err) {
     console.log(`  ⚠️  Registry: ${err.reason || err.message}\n`);
   }
+
+  // ── 7. Démo Timelock ────────────────────────────────────────
+  if (Timelock) {
+    try {
+      // Planifie un futur grant de AGENT_ROLE à agent via Timelock (délai 1 jour)
+      const AGENT_ROLE = await NFT.AGENT_ROLE();
+      const calldata = NFT.interface.encodeFunctionData("grantRole", [
+        AGENT_ROLE,
+        admin.address, // cible symbolique pour la démo
+      ]);
+      const salt = ethers.id("safeland-seed-demo-v1");
+      const predecessor = ethers.ZeroHash;
+      const delay = await Timelock.getMinDelay(); // utilise le délai minimum configuré
+
+      const tx = await Timelock.connect(admin).schedule(
+        await NFT.getAddress(),
+        0,
+        calldata,
+        predecessor,
+        salt,
+        delay
+      );
+      await tx.wait();
+
+      const opId = await Timelock.hashOperation(
+        await NFT.getAddress(), 0, calldata, predecessor, salt
+      );
+      console.log(`⏰  Opération Timelock planifiée : ${opId.slice(0, 20)}...`);
+      console.log(`   Délai : ${delay.toString()}s — exécutable après ${new Date(Date.now() + Number(delay) * 1000).toISOString()}`);
+    } catch (err) {
+      console.log(`  ⚠️  Timelock demo: ${err.reason || err.message}`);
+    }
+  } else {
+    console.log("  ⏭️  Timelock non déployé, étape ignorée");
+  }
+  console.log("");
 
   // ── Résumé ───────────────────────────────────────────────
   console.log("=".repeat(55));

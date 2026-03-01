@@ -51,6 +51,13 @@ const REGISTRY_EVENTS = [
   "event FraudPrevented(uint256 indexed tokenId, string reason)",
 ];
 
+const TIMELOCK_EVENTS = [
+  "event OperationScheduled(bytes32 indexed operationId, address indexed target, uint256 value, bytes data, uint256 readyTimestamp, string description)",
+  "event OperationExecuted(bytes32 indexed operationId, address indexed target, uint256 value, bytes returnData)",
+  "event OperationCancelled(bytes32 indexed operationId)",
+  "event MinDelayChange(uint256 oldDelay, uint256 newDelay)",
+];
+
 class NotificationService {
   constructor(server, config = {}) {
     this.wss = new WebSocketServer({ server, path: "/ws" });
@@ -90,6 +97,7 @@ class NotificationService {
           "succession.opened", "succession.finalized",
           "justice.action", "justice.executed",
           "fraud.alert",
+          "timelock", "timelock.scheduled", "timelock.executed", "timelock.cancelled",
         ],
       });
 
@@ -199,6 +207,9 @@ class NotificationService {
       }
       if (contractAddresses.registry) {
         this._listenRegistry(contractAddresses.registry);
+      }
+      if (contractAddresses.timelock) {
+        this._listenTimelock(contractAddresses.timelock);
       }
 
       console.log("👂 Écoute des événements blockchain activée");
@@ -427,6 +438,56 @@ class NotificationService {
     });
 
     this.contracts.justice = contract;
+  }
+
+  _listenTimelock(address) {
+    const contract = new ethers.Contract(address, TIMELOCK_EVENTS, this.provider);
+
+    contract.on("OperationScheduled", (operationId, target, value, data, readyTimestamp, description, event) => {
+      this.broadcast("timelock.scheduled", {
+        event: "OperationScheduled",
+        operationId,
+        target,
+        value: value.toString(),
+        readyTimestamp: readyTimestamp.toString(),
+        description,
+        txHash: event.log.transactionHash,
+        blockNumber: event.log.blockNumber,
+      });
+      console.log(`⏱️  Timelock schedulé: ${operationId.slice(0, 10)}… → ${target}`);
+    });
+
+    contract.on("OperationExecuted", (operationId, target, value, returnData, event) => {
+      this.broadcast("timelock.executed", {
+        event: "OperationExecuted",
+        operationId,
+        target,
+        value: value.toString(),
+        txHash: event.log.transactionHash,
+        blockNumber: event.log.blockNumber,
+      });
+      console.log(`✅ Timelock exécuté: ${operationId.slice(0, 10)}…`);
+    });
+
+    contract.on("OperationCancelled", (operationId, event) => {
+      this.broadcast("timelock.cancelled", {
+        event: "OperationCancelled",
+        operationId,
+        txHash: event.log.transactionHash,
+        blockNumber: event.log.blockNumber,
+      });
+      console.log(`🚫 Timelock annulé: ${operationId.slice(0, 10)}…`);
+    });
+
+    contract.on("MinDelayChange", (oldDelay, newDelay) => {
+      this.broadcast("timelock", {
+        event: "MinDelayChange",
+        oldDelay: oldDelay.toString(),
+        newDelay: newDelay.toString(),
+      });
+    });
+
+    this.contracts.timelock = contract;
   }
 
   _listenRegistry(address) {

@@ -87,6 +87,7 @@ const contractAddresses = {
   fridda: process.env.FRIDDA_ADDRESS,
   justice: process.env.JUSTICE_ADDRESS,
   registry: process.env.REGISTRY_ADDRESS,
+  timelock: process.env.TIMELOCK_ADDRESS,
 };
 
 if (Object.values(contractAddresses).some(Boolean)) {

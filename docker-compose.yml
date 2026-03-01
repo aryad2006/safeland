@@ -37,6 +37,12 @@ services:
       - FRONTEND_URL=http://localhost:3000
       - PINATA_API_KEY=${PINATA_API_KEY:-}
       - PINATA_API_SECRET=${PINATA_API_SECRET:-}
+      - NFT_ADDRESS=${NFT_ADDRESS:-}
+      - ESCROW_ADDRESS=${ESCROW_ADDRESS:-}
+      - FRIDDA_ADDRESS=${FRIDDA_ADDRESS:-}
+      - JUSTICE_ADDRESS=${JUSTICE_ADDRESS:-}
+      - REGISTRY_ADDRESS=${REGISTRY_ADDRESS:-}
+      - TIMELOCK_ADDRESS=${TIMELOCK_ADDRESS:-}
     depends_on:
       deployer:
         condition: service_completed_successfully

@@ -104,7 +104,7 @@ router.post("/login", validateBody([
     res.json({ token, address: lowerAddress, role: user.role });
 
     db.logAudit("login_success", lowerAddress, null, `role=${user.role}`);
-  } catch (err) {
+  } catch {
     res.status(401).json({ error: "Échec de vérification de signature" });
   }
 });

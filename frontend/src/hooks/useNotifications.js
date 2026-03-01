@@ -4,6 +4,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 /**
  * Hook React pour les notifications temps réel SafeLand via WebSocket.
  *
+ * Stable vis-à-vis des re-renders : passer un tableau inline (ex: ["all"])
+ * ne déclenche PAS de reconnexion.  Les channels sont synchronisés via ref
+ * et un re-subscribe est envoyé si les channels changent pendant la connexion.
+ *
  * @param {string[]} channels - Canaux à écouter (ex: ["nft", "escrow", "fraud.alert"])
  * @param {object} options - { url, maxNotifications, onNotification }
  * @returns {{ notifications, connected, subscribe, unsubscribe, clear }}
@@ -20,6 +24,12 @@ export function useNotifications(channels = ["all"], options = {}) {
   const wsRef = useRef(null);
   const reconnectTimer = useRef(null);
 
+  // Keep a ref to current channels so `connect` doesn't need them as a dep.
+  // This prevents an inline-array caller from triggering infinite reconnects.
+  const channelsRef = useRef(channels);
+  // Sync the ref on every render (synchronous, safe before effects run)
+  channelsRef.current = channels;
+
   const connect = useCallback(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
 
@@ -30,9 +40,9 @@ export function useNotifications(channels = ["all"], options = {}) {
       setConnected(true);
       console.log("🔔 WebSocket connecté");
 
-      // S'abonner aux canaux demandés
-      if (channels.length > 0) {
-        ws.send(JSON.stringify({ action: "subscribe", channels }));
+      // S'abonner aux canaux courants
+      if (channelsRef.current.length > 0) {
+        ws.send(JSON.stringify({ action: "subscribe", channels: channelsRef.current }));
       }
     };
 
@@ -72,7 +82,10 @@ export function useNotifications(channels = ["all"], options = {}) {
       console.error("WS error:", err);
       ws.close();
     };
-  }, [url, channels, maxNotifications, onNotification]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [url, maxNotifications, onNotification]);
+  // NOTE: `channels` is intentionally excluded — we read it via channelsRef so
+  // callers can safely pass inline arrays without causing reconnects.
 
   useEffect(() => {
     connect();
@@ -84,6 +97,14 @@ export function useNotifications(channels = ["all"], options = {}) {
       }
     };
   }, [connect]);
+
+  // When channels change while already connected, re-subscribe without reconnecting
+  useEffect(() => {
+    if (wsRef.current?.readyState === WebSocket.OPEN && channels.length > 0) {
+      wsRef.current.send(JSON.stringify({ action: "subscribe", channels }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [channels.join(",")]);
 
   const subscribe = useCallback((newChannels) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {

@@ -55,7 +55,7 @@ jobs:
         run: cd backend && npm ci
 
       - name: Lint backend
-        run: cd backend && npx eslint src/ --ext .js || true
+        run: cd backend && npm run lint
 
       - name: Run backend Jest tests
         run: cd backend && npx jest --forceExit --coverage --coverageReporters=text-summary

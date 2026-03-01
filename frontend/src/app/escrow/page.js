@@ -3,8 +3,9 @@
 import { useWallet } from "@/context/WalletContext";
 import { useI18n } from "@/i18n";
 import { ArrowRight, CheckCircle, DollarSign, FileText, Plus, XCircle } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { useNotifications } from "@/hooks/useNotifications";
 
 const STATUS_COLORS = {
   Created: "badge-blue",
@@ -28,6 +29,17 @@ export default function EscrowPage() {
   // Create
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({ tokenId: "", seller: "", buyer: "", price: "" });
+
+  // Auto-refresh current deal when on-chain events arrive
+  const { notifications: dealEvents } = useNotifications(["deal.created", "deal.completed", "deal.cancelled", "escrow"]);
+  useEffect(() => {
+    if (dealEvents.length > 0 && lookupId) {
+      apiCall(`/escrow/${lookupId}`)
+        .then(setDeal)
+        .catch(() => null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dealEvents]);
 
   async function handleLookup(e) {
     e.preventDefault();

@@ -1,6 +1,6 @@
 const express = require("express");
 const multer = require("multer");
-const { authenticate, requireRole } = require("../middleware/auth");
+const { authenticate } = require("../middleware/auth");
 const ipfs = require("../services/ipfs");
 
 const router = express.Router();

@@ -18,7 +18,6 @@ const {
   validateParamId,
   isValidAddress,
   isPositiveInteger,
-  isNonEmptyString,
 } = require("../utils/validators");
 
 const router = express.Router();

@@ -148,7 +148,7 @@ class NotificationService {
         default:
           this._send(ws, { type: "error", message: `Action inconnue: ${msg.action}` });
       }
-    } catch (e) {
+    } catch {
       this._send(ws, { type: "error", message: "Message JSON invalide" });
     }
   }
@@ -528,7 +528,7 @@ class NotificationService {
   // ── Cleanup ─────────────────────────────────────────────
 
   async stop() {
-    for (const [name, contract] of Object.entries(this.contracts)) {
+    for (const [, contract] of Object.entries(this.contracts)) {
       await contract.removeAllListeners();
     }
     this.wss.close();

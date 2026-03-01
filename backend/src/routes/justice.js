@@ -3,7 +3,6 @@ const { authenticate, requireRole } = require("../middleware/auth");
 const { getContracts } = require("../config/blockchain");
 const {
   validateBody,
-  validateParamId,
   isPositiveInteger,
   isValidAddress,
   isValidHash,

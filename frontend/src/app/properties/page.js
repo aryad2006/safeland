@@ -5,6 +5,7 @@ import { useI18n } from "@/i18n";
 import { ArrowRight, Home, Plus, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { useNotifications } from "@/hooks/useNotifications";
 
 export default function PropertiesPage() {
   const { isConnected, role, apiCall } = useWallet();
@@ -29,6 +30,15 @@ export default function PropertiesPage() {
   useEffect(() => {
     loadStats();
   }, []);
+
+  // Auto-refresh stats when property on-chain events arrive
+  const { notifications: propertyEvents } = useNotifications(["property.created", "property.transferred", "property.frozen"]);
+  useEffect(() => {
+    if (propertyEvents.length > 0) {
+      loadStats();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [propertyEvents]);
 
   async function loadStats() {
     try {

@@ -92,8 +92,11 @@ export function WalletProvider({ children }) {
         }
       };
 
-      const handleChainChanged = (chainIdHex) => {
-        setChainId(parseInt(chainIdHex, 16));
+      const handleChainChanged = () => {
+        // MetaMask strongly recommends reloading on chain change to avoid
+        // stale contract instances, mismatched ABIs and ethers.js provider state.
+        toast("Réseau changé — rechargement…", { icon: "🔄" });
+        setTimeout(() => window.location.reload(), 1000);
       };
 
       window.ethereum.on("accountsChanged", handleAccountsChanged);

@@ -14,7 +14,9 @@ const upload = multer({
     if (allowed.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error("Format non autorisé. Acceptés : PDF, JPEG, PNG, WebP"));
+      const err = new Error("Format non autorisé. Acceptés : PDF, JPEG, PNG, WebP");
+      err.status = 400;
+      cb(err);
     }
   },
 });

@@ -168,26 +168,14 @@ const options = {
         // ─── Timelock ──────────────────────────────────────
         TimelockScheduleRequest: {
           type: "object",
-          required: ["target", "value", "data", "predecessor", "salt", "delay"],
+          required: ["target", "salt", "delay", "description"],
           properties: {
             target:      { type: "string", description: "Adresse du contrat cible" },
-            value:       { type: "string", description: "Valeur ETH (en wei)", example: "0" },
-            data:        { type: "string", description: "Calldata encodé en hex" },
-            predecessor: { type: "string", description: "ID de l'opération précédente (0x00 si aucune)" },
-            salt:        { type: "string", description: "Salt aléatoire 32 bytes en hex" },
-            delay:       { type: "integer", description: "Délai en secondes", example: 86400 },
-          },
-        },
-        TimelockBatchRequest: {
-          type: "object",
-          required: ["targets", "values", "payloads", "predecessor", "salt", "delay"],
-          properties: {
-            targets:     { type: "array", items: { type: "string" } },
-            values:      { type: "array", items: { type: "string" } },
-            payloads:    { type: "array", items: { type: "string" } },
-            predecessor: { type: "string" },
-            salt:        { type: "string" },
-            delay:       { type: "integer" },
+            value:       { type: "string", description: "Valeur ETH envoyée avec l'appel", example: "0" },
+            data:        { type: "string", description: "Calldata encodé en hex", example: "0x" },
+            salt:        { type: "string", description: "Salt bytes32 unique (0x + 64 hex)", example: "0xabc..." },
+            delay:       { type: "integer", description: "Délai en secondes (≥ 86400 = 1 jour)", example: 86400 },
+            description: { type: "string", description: "Description lisible de l'opération" },
           },
         },
         TimelockOperationResponse: {

@@ -260,21 +260,21 @@ async function main() {
         admin.address, // cible symbolique pour la démo
       ]);
       const salt = ethers.id("safeland-seed-demo-v1");
-      const predecessor = ethers.ZeroHash;
-      const delay = await Timelock.getMinDelay(); // utilise le délai minimum configuré
+      // MIN_DELAY est une constante publique (pas getMinDelay)
+      const delay = await Timelock.MIN_DELAY();
 
       const tx = await Timelock.connect(admin).schedule(
-        await NFT.getAddress(),
-        0,
-        calldata,
-        predecessor,
-        salt,
-        delay
+        await NFT.getAddress(), // target
+        0,                       // value
+        calldata,                // data
+        salt,                    // salt (pas de predecessor dans SafeLandTimelock)
+        delay,                   // delay en secondes
+        "Seed demo: grant AGENT_ROLE via Timelock" // description
       );
       await tx.wait();
 
       const opId = await Timelock.hashOperation(
-        await NFT.getAddress(), 0, calldata, predecessor, salt
+        await NFT.getAddress(), 0, calldata, salt
       );
       console.log(`⏰  Opération Timelock planifiée : ${opId.slice(0, 20)}...`);
       console.log(`   Délai : ${delay.toString()}s — exécutable après ${new Date(Date.now() + Number(delay) * 1000).toISOString()}`);

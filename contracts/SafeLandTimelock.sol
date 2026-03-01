@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
 /**
  * @title SafeLandTimelock
@@ -19,7 +20,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  *        3. Un EXECUTOR exécute l'opération → execute()
  *        4. Optionnel : un CANCELLER peut annuler → cancel()
  */
-contract SafeLandTimelock is AccessControlUpgradeable, UUPSUpgradeable {
+contract SafeLandTimelock is AccessControlUpgradeable, UUPSUpgradeable, ReentrancyGuardUpgradeable {
     // ─── Rôles ────────────────────────────────────────────
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
     bytes32 public constant PROPOSER_ROLE = keccak256("PROPOSER_ROLE");
@@ -89,6 +90,7 @@ contract SafeLandTimelock is AccessControlUpgradeable, UUPSUpgradeable {
     ) public initializer {
         __AccessControl_init();
         __UUPSUpgradeable_init();
+        __ReentrancyGuard_init();
 
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(ADMIN_ROLE, admin);
@@ -219,7 +221,7 @@ contract SafeLandTimelock is AccessControlUpgradeable, UUPSUpgradeable {
         uint256 value,
         bytes calldata data,
         bytes32 salt
-    ) external payable onlyRole(EXECUTOR_ROLE) returns (bytes memory) {
+    ) external payable onlyRole(EXECUTOR_ROLE) nonReentrant returns (bytes memory) {
         bytes32 operationId = hashOperation(target, value, data, salt);
         Operation storage op = _operations[operationId];
 

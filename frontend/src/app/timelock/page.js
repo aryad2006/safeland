@@ -11,8 +11,9 @@ import {
   PlusCircle,
   XCircle,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
+import { useNotifications } from "@/hooks/useNotifications";
 
 const STATUS_COLORS = {
   Pending:   "badge-yellow",
@@ -45,6 +46,23 @@ export default function TimelockPage() {
   });
 
   const isAdmin = role === "admin";
+
+  // Auto-refresh when Timelock events arrive via WebSocket
+  const timelockChannels = useMemo(() => ["timelock.scheduled", "timelock.executed", "timelock.cancelled"], []);
+  const { notifications: timelockEvents } = useNotifications(timelockChannels);
+
+  useEffect(() => {
+    if (timelockEvents.length > 0) {
+      loadStats();
+      // Refresh current operation if we're viewing one
+      if (lookupId) {
+        apiCall(`/timelock/operations/${lookupId}`)
+          .then(setOperation)
+          .catch(() => null);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timelockEvents]);
 
   async function loadStats() {
     try {
@@ -125,7 +143,7 @@ export default function TimelockPage() {
   }
 
   // Auto-load stats on mount
-  useState(() => { loadStats(); }, []);
+  useEffect(() => { loadStats(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div>

@@ -30,8 +30,11 @@ function getLabel(notification) {
     ActionExecuted: "⚖️ Action judiciaire exécutée",
     FraudPrevented: "🚨 Tentative de fraude détectée",
     VoteCast: "🗳️ Vote enregistré",
-    ProposalExecuted: "📋 Proposition exécutée",
-  };
+    ProposalExecuted: "📋 Proposition exécutée",    // Timelock
+    OperationScheduled: "⏱️ Opération Timelock planifiée",
+    OperationExecuted: "✅ Opération Timelock exécutée",
+    OperationCancelled: "⛔ Opération Timelock annulée",
+    MinDelayChange: "⚠️ Délai minimum modifié",  };
   return labels[notification.event] || notification.event;
 }
 
@@ -119,6 +122,12 @@ export default function NotificationBell() {
                           <p className="text-xs text-gray-500 mt-0.5">
                             Deal #{n.dealId}
                             {n.price && ` • ${n.price} ETH`}
+                          </p>
+                        )}
+                        {n.operationId && (
+                          <p className="text-xs text-gray-500 mt-0.5 font-mono">
+                            op: {n.operationId.slice(0, 14)}…
+                            {n.description && ` • ${n.description}`}
                           </p>
                         )}
                         <p className="text-xs text-gray-400 mt-1">

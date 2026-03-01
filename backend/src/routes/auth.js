@@ -14,7 +14,7 @@ const {
 const router = express.Router();
 
 // Rôles reconnus
-const VALID_ROLES = ["admin", "agent", "notary", "justice", "owner", "buyer", "conservator", "judge"];
+const VALID_ROLES = ["admin", "agent", "notary", "justice", "owner", "buyer", "conservator", "judge", "bank"];
 
 /**
  * @swagger

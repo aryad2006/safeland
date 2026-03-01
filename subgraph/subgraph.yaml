@@ -172,3 +172,30 @@ dataSources:
         - event: RecoveryExecuted(indexed uint256,uint256,address)
           handler: handleRecoveryExecuted
       file: ./src/mappings/justice.ts
+
+  # ── SafeLandTimelock ──────────────────────
+  - kind: ethereum/contract
+    name: SafeLandTimelock
+    network: sepolia
+    source:
+      address: "0x0000000000000000000000000000000000000000" # Replace after deployment
+      abi: SafeLandTimelock
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - TimelockOperation
+        - GlobalStat
+      abis:
+        - name: SafeLandTimelock
+          file: ./abis/SafeLandTimelock.json
+      eventHandlers:
+        - event: OperationScheduled(indexed bytes32,indexed address,uint256,bytes,uint256,string)
+          handler: handleOperationScheduled
+        - event: OperationExecuted(indexed bytes32,indexed address,uint256,bytes)
+          handler: handleOperationExecuted
+        - event: OperationCancelled(indexed bytes32)
+          handler: handleOperationCancelled
+      file: ./src/mappings/timelock.ts

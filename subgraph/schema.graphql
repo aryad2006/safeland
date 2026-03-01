@@ -167,6 +167,24 @@ type Recovery @entity {
   txHash: Bytes!
 }
 
+# ── Timelock ────────────────────────────────
+
+type TimelockOperation @entity {
+  id: ID!                         # operationId (bytes32 hex)
+  target: Bytes!
+  value: BigInt!
+  description: String!
+  readyTimestamp: BigInt!
+  status: String!                 # "Pending" | "Executed" | "Cancelled"
+  proposer: Bytes!
+  scheduledAt: BigInt!
+  scheduledTx: Bytes!
+  executedAt: BigInt
+  executedTx: Bytes
+  cancelledAt: BigInt
+  cancelledTx: Bytes
+}
+
 # ── Global Stats ────────────────────────────
 
 type GlobalStat @entity {
@@ -178,4 +196,5 @@ type GlobalStat @entity {
   totalSuccessions: Int!
   totalJusticeActions: Int!
   totalFraudAlerts: Int!
+  totalTimelockOps: Int!
 }

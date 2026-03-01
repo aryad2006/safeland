@@ -14,6 +14,7 @@ export function getOrCreateGlobalStat(): GlobalStat {
     stat.totalSuccessions = 0;
     stat.totalJusticeActions = 0;
     stat.totalFraudAlerts = 0;
+    stat.totalTimelockOps = 0;
     stat.save();
   }
   return stat as GlobalStat;

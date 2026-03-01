@@ -33,7 +33,7 @@ async function main() {
   }
 
   // ─── 1. SafeLandNFT ─────────────────────────────────────
-  console.log("\n1/5 — Déploiement SafeLandNFT (ERC-721)...");
+  console.log("\n1/6 — Déploiement SafeLandNFT (ERC-721)...");
   const SafeLandNFT = await ethers.getContractFactory("SafeLandNFT");
   const nft = await upgrades.deployProxy(SafeLandNFT, [deployer.address], {
     initializer: "initialize",
@@ -44,7 +44,7 @@ async function main() {
   console.log("   ✅ SafeLandNFT:", nftAddress);
 
   // ─── 2. SafeLandRegistry ────────────────────────────────
-  console.log("\n2/5 — Déploiement SafeLandRegistry...");
+  console.log("\n2/6 — Déploiement SafeLandRegistry...");
   const SafeLandRegistry = await ethers.getContractFactory("SafeLandRegistry");
   const registry = await upgrades.deployProxy(SafeLandRegistry, [deployer.address], {
     initializer: "initialize",
@@ -55,7 +55,7 @@ async function main() {
 
   // ─── 3. SafeLandEscrow ──────────────────────────────────
   // En testnet, le deployer reçoit DGI/ANCFCC
-  console.log("\n3/5 — Déploiement SafeLandEscrow...");
+  console.log("\n3/6 — Déploiement SafeLandEscrow...");
   const SafeLandEscrow = await ethers.getContractFactory("SafeLandEscrow");
   const escrow = await upgrades.deployProxy(
     SafeLandEscrow,
@@ -67,7 +67,7 @@ async function main() {
   console.log("   ✅ SafeLandEscrow:", escrowAddress);
 
   // ─── 4. SafeLandFridda ──────────────────────────────────
-  console.log("\n4/5 — Déploiement SafeLandFridda (ERC-1155)...");
+  console.log("\n4/6 — Déploiement SafeLandFridda (ERC-1155)...");
   const SafeLandFridda = await ethers.getContractFactory("SafeLandFridda");
   const fridda = await upgrades.deployProxy(
     SafeLandFridda,
@@ -79,7 +79,7 @@ async function main() {
   console.log("   ✅ SafeLandFridda:", friddaAddress);
 
   // ─── 5. SafeLandJustice ─────────────────────────────────
-  console.log("\n5/5 — Déploiement SafeLandJustice...");
+  console.log("\n5/6 — Déploiement SafeLandJustice...");
   const SafeLandJustice = await ethers.getContractFactory("SafeLandJustice");
   const justice = await upgrades.deployProxy(
     SafeLandJustice,
@@ -90,11 +90,25 @@ async function main() {
   const justiceAddress = await justice.getAddress();
   console.log("   ✅ SafeLandJustice:", justiceAddress);
 
+  // ─── 6. SafeLandTimelock ────────────────────────────────
+  console.log("\n6/6 — Déploiement SafeLandTimelock...");
+  const SafeLandTimelock = await ethers.getContractFactory("SafeLandTimelock");
+  const timelock = await upgrades.deployProxy(
+    SafeLandTimelock,
+    [deployer.address, [deployer.address], [deployer.address]],
+    { initializer: "initialize" }
+  );
+  await timelock.waitForDeployment();
+  const timelockAddress = await timelock.getAddress();
+  console.log("   ✅ SafeLandTimelock:", timelockAddress);
+
   // ─── Configuration des rôles ────────────────────────────
   console.log("\n⚙️  Configuration des rôles...");
   const AGENT_ROLE = ethers.keccak256(ethers.toUtf8Bytes("AGENT_ROLE"));
   const JUSTICE_ROLE = ethers.keccak256(ethers.toUtf8Bytes("JUSTICE_ROLE"));
   const OPERATOR_ROLE = ethers.keccak256(ethers.toUtf8Bytes("OPERATOR_ROLE"));
+  const UPGRADER_ROLE = ethers.keccak256(ethers.toUtf8Bytes("UPGRADER_ROLE"));
+  const ADMIN_ROLE = ethers.keccak256(ethers.toUtf8Bytes("ADMIN_ROLE"));
 
   await (await nft.grantRole(AGENT_ROLE, escrowAddress)).wait();
   console.log("   ✅ AGENT_ROLE → Escrow");
@@ -104,6 +118,16 @@ async function main() {
 
   await (await registry.grantRole(OPERATOR_ROLE, deployer.address)).wait();
   console.log("   ✅ OPERATOR_ROLE → Deployer");
+
+  // Timelock prend le contrôle des upgrades
+  await (await nft.grantRole(UPGRADER_ROLE, timelockAddress)).wait();
+  console.log("   ✅ UPGRADER_ROLE → Timelock (NFT)");
+
+  await (await registry.grantRole(ADMIN_ROLE, timelockAddress)).wait();
+  await (await escrow.grantRole(ADMIN_ROLE, timelockAddress)).wait();
+  await (await fridda.grantRole(ADMIN_ROLE, timelockAddress)).wait();
+  await (await justice.grantRole(ADMIN_ROLE, timelockAddress)).wait();
+  console.log("   ✅ ADMIN_ROLE → Timelock (Registry, Escrow, Fridda, Justice)");
 
   // ─── Résumé ─────────────────────────────────────────────
   const addresses = {
@@ -117,11 +141,12 @@ async function main() {
       SafeLandEscrow: escrowAddress,
       SafeLandFridda: friddaAddress,
       SafeLandJustice: justiceAddress,
+      SafeLandTimelock: timelockAddress,
     },
   };
 
   console.log("\n" + "═".repeat(60));
-  console.log("🎉 DÉPLOIEMENT SEPOLIA TERMINÉ — SafeLand Morocco");
+  console.log("\n🎉 DÉPLOIEMENT SEPOLIA TERMINÉ (6/6) — SafeLand Morocco");
   console.log("═".repeat(60));
   Object.entries(addresses.contracts).forEach(([name, addr]) => {
     console.log(`   ${name}: ${addr}`);

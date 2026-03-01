@@ -1,6 +1,15 @@
 const express = require("express");
 const { authenticate, requireRole } = require("../middleware/auth");
 const { getContracts } = require("../config/blockchain");
+const {
+  validateBody,
+  validateParamId,
+  isPositiveInteger,
+  isValidAddress,
+  isValidHash,
+  isValidActionType,
+  isNonEmptyString,
+} = require("../utils/validators");
 
 const router = express.Router();
 
@@ -10,13 +19,15 @@ const ACTION_TYPES = ["Freeze", "BurnRemint", "SocialRecovery"];
  * POST /api/justice/actions
  * Proposer une action judiciaire (juge uniquement)
  */
-router.post("/actions", authenticate, requireRole("judge", "admin"), async (req, res, next) => {
+router.post("/actions", authenticate, requireRole("judge", "admin"), validateBody([
+  { field: "tokenId", validator: isPositiveInteger, message: "tokenId: entier positif requis" },
+  { field: "judgmentHash", validator: isValidHash, message: "judgmentHash: hash invalide" },
+  { field: "actionType", validator: isValidActionType, message: "actionType: 0 (Freeze), 1 (BurnRemint) ou 2 (SocialRecovery)" },
+  { field: "newOwner", validator: isValidAddress, message: "newOwner: adresse Ethereum invalide", optional: true },
+  { field: "newUri", validator: isNonEmptyString, message: "newUri: chaîne invalide", optional: true },
+]), async (req, res, next) => {
   try {
     const { tokenId, newOwner, judgmentHash, newUri, actionType } = req.body;
-
-    if (tokenId === undefined || !judgmentHash || actionType === undefined) {
-      return res.status(400).json({ error: "tokenId, judgmentHash et actionType requis" });
-    }
 
     const { justice } = await getContracts();
 
@@ -118,13 +129,12 @@ router.post("/actions/:actionId/execute", authenticate, requireRole("judge", "ad
  * POST /api/justice/recovery
  * Initier une demande de récupération sociale (conservateur/juge)
  */
-router.post("/recovery", authenticate, requireRole("judge", "conservator", "admin"), async (req, res, next) => {
+router.post("/recovery", authenticate, requireRole("judge", "conservator", "admin"), validateBody([
+  { field: "tokenId", validator: isPositiveInteger, message: "tokenId: entier positif requis" },
+  { field: "newWallet", validator: isValidAddress, message: "newWallet: adresse Ethereum invalide" },
+]), async (req, res, next) => {
   try {
     const { tokenId, newWallet } = req.body;
-
-    if (tokenId === undefined || !newWallet) {
-      return res.status(400).json({ error: "tokenId et newWallet requis" });
-    }
 
     const { justice } = await getContracts();
 

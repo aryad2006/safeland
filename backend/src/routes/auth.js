@@ -1,19 +1,20 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const { ethers } = require("ethers");
+const crypto = require("crypto");
 const { authenticate } = require("../middleware/auth");
+const { JWT_SECRET, JWT_EXPIRES } = require("../config/security");
+const db = require("../config/database");
+const {
+  validateBody,
+  isValidAddress,
+  isNonEmptyString,
+} = require("../utils/validators");
 
 const router = express.Router();
 
-const JWT_SECRET = process.env.JWT_SECRET || "safeland-dev-secret";
-const JWT_EXPIRES = process.env.JWT_EXPIRES || "30m";
-
-// ─── Stockage en mémoire (remplacer par DB en prod) ───
-const nonces = new Map(); // address → nonce
-const users = new Map();  // address → { role, createdAt }
-
 // Rôles reconnus
-const VALID_ROLES = ["admin", "agent", "notary", "justice", "owner", "buyer"];
+const VALID_ROLES = ["admin", "agent", "notary", "justice", "owner", "buyer", "conservator", "judge"];
 
 /**
  * @swagger
@@ -36,14 +37,13 @@ const VALID_ROLES = ["admin", "agent", "notary", "justice", "owner", "buyer"];
  *             schema:
  *               $ref: '#/components/schemas/NonceResponse'
  */
-router.post("/nonce", (req, res) => {
+router.post("/nonce", validateBody([
+  { field: "address", validator: isValidAddress, message: "Adresse Ethereum invalide (format 0x...)" },
+]), (req, res) => {
   const { address } = req.body;
-  if (!address || !ethers.isAddress(address)) {
-    return res.status(400).json({ error: "Adresse Ethereum invalide" });
-  }
 
-  const nonce = `SafeLand Auth ${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  nonces.set(address.toLowerCase(), nonce);
+  const nonce = `SafeLand Auth ${Date.now()}-${crypto.randomBytes(16).toString("hex")}`;
+  db.setNonce(address.toLowerCase(), nonce);
 
   res.json({ nonce });
 });
@@ -69,35 +69,31 @@ router.post("/nonce", (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/LoginResponse'
  */
-router.post("/login", (req, res) => {
+router.post("/login", validateBody([
+  { field: "address", validator: isValidAddress, message: "Adresse Ethereum invalide" },
+  { field: "signature", validator: isNonEmptyString, message: "Signature requise" },
+]), (req, res) => {
   const { address, signature } = req.body;
 
-  if (!address || !signature) {
-    return res.status(400).json({ error: "Adresse et signature requis" });
-  }
-
   const lowerAddress = address.toLowerCase();
-  const nonce = nonces.get(lowerAddress);
+  const nonce = db.getNonce(lowerAddress);
 
   if (!nonce) {
-    return res.status(400).json({ error: "Nonce introuvable — demandez /nonce d'abord" });
+    return res.status(400).json({ error: "Nonce introuvable ou expiré — demandez /nonce d'abord" });
   }
 
   try {
     const recovered = ethers.verifyMessage(nonce, signature);
     if (recovered.toLowerCase() !== lowerAddress) {
+      db.logAudit("login_failed", lowerAddress, null, "Signature invalide");
       return res.status(401).json({ error: "Signature invalide" });
     }
 
     // Supprimer le nonce utilisé
-    nonces.delete(lowerAddress);
+    db.deleteNonce(lowerAddress);
 
-    // Récupérer ou créer l'utilisateur
-    let user = users.get(lowerAddress);
-    if (!user) {
-      user = { role: "owner", createdAt: new Date().toISOString() };
-      users.set(lowerAddress, user);
-    }
+    // Récupérer ou créer l'utilisateur en SQLite
+    const user = db.createOrGetUser(lowerAddress, "owner");
 
     const token = jwt.sign(
       { address: lowerAddress, role: user.role },
@@ -106,6 +102,8 @@ router.post("/login", (req, res) => {
     );
 
     res.json({ token, address: lowerAddress, role: user.role });
+
+    db.logAudit("login_success", lowerAddress, null, `role=${user.role}`);
   } catch (err) {
     res.status(401).json({ error: "Échec de vérification de signature" });
   }
@@ -116,7 +114,7 @@ router.post("/login", (req, res) => {
  * Retourne les infos de l'utilisateur connecté
  */
 router.get("/me", authenticate, (req, res) => {
-  const user = users.get(req.user.address) || { role: req.user.role };
+  const user = db.getUser(req.user.address) || { role: req.user.role };
   res.json({ address: req.user.address, ...user });
 });
 
@@ -124,27 +122,20 @@ router.get("/me", authenticate, (req, res) => {
  * PUT /api/auth/role  (admin only)
  * Modifie le rôle d'un utilisateur
  */
-router.put("/role", authenticate, (req, res) => {
+router.put("/role", authenticate, validateBody([
+  { field: "address", validator: isValidAddress, message: "Adresse Ethereum invalide" },
+  { field: "role", validator: (v) => VALID_ROLES.includes(v), message: `Rôle invalide. Valeurs: ${VALID_ROLES.join(", ")}` },
+]), (req, res) => {
   if (req.user.role !== "admin") {
     return res.status(403).json({ error: "Seul un admin peut modifier les rôles" });
   }
 
   const { address, role } = req.body;
-  if (!address || !ethers.isAddress(address)) {
-    return res.status(400).json({ error: "Adresse invalide" });
-  }
-  if (!VALID_ROLES.includes(role)) {
-    return res.status(400).json({ error: `Rôle invalide. Valeurs: ${VALID_ROLES.join(", ")}` });
-  }
-
   const lowerAddress = address.toLowerCase();
-  let user = users.get(lowerAddress);
-  if (!user) {
-    user = { role, createdAt: new Date().toISOString() };
-  } else {
-    user.role = role;
-  }
-  users.set(lowerAddress, user);
+
+  const user = db.updateUserRole(lowerAddress, role);
+
+  db.logAudit("role_changed", req.user.address, lowerAddress, `new_role=${role}`);
 
   res.json({ address: lowerAddress, role: user.role });
 });

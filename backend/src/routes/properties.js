@@ -1,6 +1,15 @@
 const express = require("express");
 const { authenticate, requireRole } = require("../middleware/auth");
 const { getContracts } = require("../config/blockchain");
+const {
+  validateBody,
+  validateParamId,
+  isValidAddress,
+  isNonEmptyString,
+  isPositiveNumber,
+  isValidHash,
+  isValidGPS,
+} = require("../utils/validators");
 
 const router = express.Router();
 
@@ -31,13 +40,17 @@ const router = express.Router();
  *       400:
  *         description: Champs manquants
  */
-router.post("/", authenticate, requireRole("agent", "notary", "admin"), async (req, res, next) => {
+router.post("/", authenticate, requireRole("agent", "notary", "admin"), validateBody([
+  { field: "to", validator: isValidAddress, message: "to: adresse Ethereum invalide" },
+  { field: "titreFoncier", validator: isNonEmptyString, message: "titreFoncier: requis (ex: 12345/R)" },
+  { field: "surface", validator: isPositiveNumber, message: "surface: nombre positif requis" },
+  { field: "propertyType", validator: isNonEmptyString, message: "propertyType: requis (Villa, Terrain, Appartement…)" },
+  { field: "city", validator: isNonEmptyString, message: "city: requis" },
+  { field: "gpsCoords", validator: isValidGPS, message: "gpsCoords: requis" },
+  { field: "documentHash", validator: isValidHash, message: "documentHash: hash ou CID invalide" },
+]), async (req, res, next) => {
   try {
     const { to, titreFoncier, surface, propertyType, city, gpsCoords, documentHash } = req.body;
-
-    if (!to || !titreFoncier || !surface || !propertyType || !city || !gpsCoords || !documentHash) {
-      return res.status(400).json({ error: "Champs obligatoires manquants" });
-    }
 
     const { nft, registry } = await getContracts();
 
@@ -157,15 +170,14 @@ router.get("/", async (req, res, next) => {
  * POST /api/properties/:tokenId/transfer
  * Transfert de propriété (via contrat — généralement utilisé par l'escrow)
  */
-router.post("/:tokenId/transfer", authenticate, requireRole("agent", "notary", "admin"), async (req, res, next) => {
+router.post("/:tokenId/transfer", authenticate, requireRole("agent", "notary", "admin"), validateParamId("tokenId"), validateBody([
+  { field: "to", validator: isValidAddress, message: "to: adresse Ethereum invalide" },
+  { field: "documentHash", validator: isValidHash, message: "documentHash: hash invalide" },
+]), async (req, res, next) => {
   try {
     const { nft } = await getContracts();
     const { to, documentHash } = req.body;
     const tokenId = req.params.tokenId;
-
-    if (!to || !documentHash) {
-      return res.status(400).json({ error: "Destinataire et documentHash requis" });
-    }
 
     const tx = await nft.transferProperty(tokenId, to, documentHash);
     const receipt = await tx.wait();
@@ -216,15 +228,15 @@ router.post("/:tokenId/unlock", authenticate, async (req, res, next) => {
  * POST /api/properties/:tokenId/encumbrance
  * Ajout d'une charge (hypothèque, saisie, etc.)
  */
-router.post("/:tokenId/encumbrance", authenticate, requireRole("notary", "justice", "admin"), async (req, res, next) => {
+router.post("/:tokenId/encumbrance", authenticate, requireRole("notary", "justice", "admin"), validateParamId("tokenId"), validateBody([
+  { field: "encumbranceType", validator: isNonEmptyString, message: "encumbranceType: requis" },
+  { field: "description", validator: isNonEmptyString, message: "description: requis" },
+  { field: "documentHash", validator: isValidHash, message: "documentHash: hash invalide" },
+]), async (req, res, next) => {
   try {
     const { nft } = await getContracts();
     const { encumbranceType, description, documentHash } = req.body;
     const tokenId = req.params.tokenId;
-
-    if (!encumbranceType || !description || !documentHash) {
-      return res.status(400).json({ error: "Type, description et documentHash requis" });
-    }
 
     const tx = await nft.addEncumbrance(tokenId, encumbranceType, description, documentHash);
     const receipt = await tx.wait();

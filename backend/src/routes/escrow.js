@@ -2,6 +2,13 @@ const express = require("express");
 const { ethers } = require("ethers");
 const { authenticate, requireRole } = require("../middleware/auth");
 const { getContracts } = require("../config/blockchain");
+const {
+  validateBody,
+  validateParamId,
+  isValidAddress,
+  isPositiveInteger,
+  isPositiveNumber,
+} = require("../utils/validators");
 
 const router = express.Router();
 
@@ -9,13 +16,14 @@ const router = express.Router();
  * POST /api/escrow
  * Créer un deal escrow (notaire uniquement)
  */
-router.post("/", authenticate, requireRole("notary", "admin"), async (req, res, next) => {
+router.post("/", authenticate, requireRole("notary", "admin"), validateBody([
+  { field: "tokenId", validator: isPositiveInteger, message: "tokenId: entier positif requis" },
+  { field: "seller", validator: isValidAddress, message: "seller: adresse Ethereum invalide" },
+  { field: "buyer", validator: isValidAddress, message: "buyer: adresse Ethereum invalide" },
+  { field: "price", validator: isPositiveNumber, message: "price: nombre positif requis (en ETH)" },
+]), async (req, res, next) => {
   try {
     const { tokenId, seller, buyer, price } = req.body;
-
-    if (!tokenId || !seller || !buyer || !price) {
-      return res.status(400).json({ error: "tokenId, seller, buyer et price requis" });
-    }
 
     const { escrow } = await getContracts();
 

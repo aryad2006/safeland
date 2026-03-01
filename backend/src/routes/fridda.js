@@ -1,6 +1,16 @@
 const express = require("express");
 const { authenticate, requireRole } = require("../middleware/auth");
 const { getContracts } = require("../config/blockchain");
+const {
+  validateBody,
+  validateParamId,
+  isPositiveInteger,
+  isAddressArray,
+  isPositiveIntegerArray,
+  isNonEmptyString,
+  isValidVoteType,
+  isBoolean,
+} = require("../utils/validators");
 
 const router = express.Router();
 
@@ -9,13 +19,15 @@ const router = express.Router();
  * Ouvrir un dossier de succession
  * Rôles : notary, justice, admin
  */
-router.post("/", authenticate, requireRole("notary", "justice", "admin"), async (req, res, next) => {
+router.post("/", authenticate, requireRole("notary", "justice", "admin"), validateBody([
+  { field: "nftTokenId", validator: isPositiveInteger, message: "nftTokenId: entier positif requis" },
+  { field: "heirs", validator: isAddressArray, message: "heirs: tableau d'adresses Ethereum valides requis" },
+  { field: "shares", validator: isPositiveIntegerArray, message: "shares: tableau d'entiers positifs requis" },
+  { field: "adoulCid", validator: isNonEmptyString, message: "adoulCid: CID invalide", optional: true },
+  { field: "notaryCid", validator: isNonEmptyString, message: "notaryCid: CID invalide", optional: true },
+]), async (req, res, next) => {
   try {
     const { nftTokenId, heirs, shares, adoulCid, notaryCid } = req.body;
-
-    if (!nftTokenId || !heirs || !shares) {
-      return res.status(400).json({ error: "nftTokenId, heirs et shares requis" });
-    }
 
     if (heirs.length !== shares.length) {
       return res.status(400).json({ error: "Le nombre d'héritiers doit correspondre au nombre de parts" });
@@ -120,13 +132,12 @@ router.post("/:dossierId/finalize", authenticate, requireRole("notary", "justice
  * POST /api/fridda/:dossierId/propose
  * Créer une proposition de gouvernance (vente, location, rénovation)
  */
-router.post("/:dossierId/propose", authenticate, async (req, res, next) => {
+router.post("/:dossierId/propose", authenticate, validateParamId("dossierId"), validateBody([
+  { field: "voteType", validator: isValidVoteType, message: "voteType: 0 (Sell), 1 (Rent) ou 2 (Renovate)" },
+  { field: "description", validator: isNonEmptyString, message: "description: requis" },
+]), async (req, res, next) => {
   try {
     const { voteType, description, quorumBps, durationDays } = req.body;
-
-    if (voteType === undefined || !description) {
-      return res.status(400).json({ error: "voteType et description requis" });
-    }
 
     const { fridda } = await getContracts();
     const dossierId = req.params.dossierId;
@@ -156,13 +167,11 @@ router.post("/:dossierId/propose", authenticate, async (req, res, next) => {
  * POST /api/fridda/:dossierId/vote/:proposalId
  * Voter sur une proposition
  */
-router.post("/:dossierId/vote/:proposalId", authenticate, async (req, res, next) => {
+router.post("/:dossierId/vote/:proposalId", authenticate, validateParamId("dossierId"), validateParamId("proposalId"), validateBody([
+  { field: "support", validator: isBoolean, message: "support: booléen requis (true/false)" },
+]), async (req, res, next) => {
   try {
     const { support } = req.body; // true = pour, false = contre
-
-    if (support === undefined) {
-      return res.status(400).json({ error: "Le champ 'support' (true/false) est requis" });
-    }
 
     const { fridda } = await getContracts();
     const { proposalId } = req.params;

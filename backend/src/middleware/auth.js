@@ -1,6 +1,5 @@
 const jwt = require("jsonwebtoken");
-
-const JWT_SECRET = process.env.JWT_SECRET || "safeland-dev-secret";
+const { JWT_SECRET } = require("../config/security");
 
 /**
  * Middleware d'authentification JWT

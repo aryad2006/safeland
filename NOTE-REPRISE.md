@@ -1,39 +1,35 @@
 # SafeLand — Note Technique de Reprise
 
-> Date : 19 février 2026  
-> Dernier commit : `9877761` — feat: i18n multi-langue FR/AR/EN  
-> État : **Modifications non commitées** (11 fichiers modifiés, 1 nouveau)
+> Date : 2025 (session courante)
+> Derniers commits connus : `84ae9bc` (backend hardening + SafeLandTimelock) → `8730edf` (Timelock/Bank integration)
+> État : **Modifications non commitées** — frontend Timelock/Bank, CI/CD mis à jour
 
 ---
 
 ## 1. ÉTAT GIT — Changements non commités
 
-### Fichiers modifiés (à commiter) :
+### Fichiers créés / modifiés dans cette session :
 ```
-M  backend/Dockerfile              → ajout COPY artifacts/, volume deploy
-M  backend/src/index.js            → ajout route /api/justice
-M  docker-compose.yml              → backend depends_on deployer, volume addresses
-M  frontend/jsconfig.json          → ajout ignoreDeprecations: "6.0"
-M  frontend/next.config.js         → ajout output: "standalone"
-M  frontend/src/app/dashboard/page.js → i18n avec t() (terminé)
-M  frontend/src/i18n/locales/ar.json  → clés étendues (dashboard→stats complet)
-M  frontend/src/i18n/locales/en.json  → clés étendues (dashboard→stats complet)
-M  frontend/src/i18n/locales/fr.json  → clés étendues (dashboard→stats complet)
-M  package-lock.json               → prettier ajouté
-M  package.json                    → prettier ajouté
-?? backend/src/routes/justice.js   → NOUVEAU — routes API Justice (7 endpoints)
+A  frontend/src/app/timelock/page.js      → page admin Timelock complète
+A  frontend/src/app/bank/page.js          → page B2B Banques complète (4 onglets)
+M  frontend/src/components/Navbar.js      → liens timelock/bank conditionnels par rôle
+M  frontend/src/app/dashboard/page.js     → cards Timelock+Bank, 6 contracts dans archi
+M  frontend/src/i18n/locales/fr.json      → clés timelock.* + bank.* + nav.timelock/bank
+M  frontend/src/i18n/locales/en.json      → idem en anglais
+M  frontend/src/i18n/locales/ar.json      → idem en arabe
+M  frontend/e2e/app.spec.js               → tests navigation /timelock et /bank
+M  .github/workflows/ci.yml               → ajout job Jest backend + job E2E Playwright
 ```
 
 ### Commande pour commiter :
 ```bash
-cd /Users/imac/Desktop/safeland
 git add -A
-git commit -m "feat: Docker fixes, Justice API, i18n locales étendues, standalone build"
+git commit -m "feat: frontend Timelock+Bank, i18n complet, CI Jest+E2E, navbar role-based"
 ```
 
 ---
 
-## 2. ROADMAP COMPLÉTÉE (10/10)
+## 2. ROADMAP COMPLÉTÉE (10/10 + extensions)
 
 | # | Tâche | Commit | Statut |
 |---|-------|--------|--------|
@@ -47,96 +43,93 @@ git commit -m "feat: Docker fixes, Justice API, i18n locales étendues, standalo
 | 8 | Tests E2E Playwright (14 tests) | `4eb3e3b` | ✅ |
 | 9 | Gas optimizations (5 contrats) | `e236422` | ✅ |
 | 10 | i18n FR/AR/EN | `9877761` | ✅ |
+| 11 | SafeLandTimelock contract + backend routes | `84ae9bc` + `8730edf` | ✅ |
+| 12 | Frontend Timelock + Bank + i18n + CI/CD complet | session courante | ✅ |
 
 ---
 
-## 3. TRAVAIL EN COURS (non commité)
-
-### ✅ Terminé dans cette session :
-1. **Fix build frontend** — cache `.next/` nettoyé, `output: "standalone"` ajouté, `ignoreDeprecations` pour jsconfig
-2. **Fix Docker** — backend Dockerfile copie artifacts, docker-compose: backend `depends_on: deployer`, volume mounted pour deployed-addresses.json
-3. **Routes API Justice** — `backend/src/routes/justice.js` (7 endpoints : propose, get, sign, execute, recovery, get-recovery, stats)
-4. **Locales étendues** — fr/en/ar.json : ~200 clés chacune, sections dashboard/properties/escrow/fridda/justice/stats complètes
-5. **Dashboard i18n** — page dashboard utilise `t()` partout
-
-### 🔄 Reste à faire :
-1. ~~**i18n des 5 pages restantes**~~ ✅ FAIT (commit `376e7e5`) — toasts, labels fees, labels stats, label dossier tous traduits
-2. ~~**Page Justice**~~ ✅ DÉJÀ FAIT — utilisait déjà `apiCall()`, cohérent avec le reste
-3. ~~**Branch coverage**~~ ✅ AMÉLIORÉ (commit `3088c93`) — 89% → 96% branches, 181 tests. Registry 100%. Restant : nonReentrant modifier false-paths (nécessitent contrats attaquants).
-4. **Input validation backend** — les routes ne valident que la présence des champs, pas le format.
-
----
-
-## 4. ARCHITECTURE TECHNIQUE
+## 3. ARCHITECTURE TECHNIQUE
 
 ### Smart Contracts (Solidity 0.8.24, OZ v5 UUPS)
-- `SafeLandNFT.sol` — ERC-721 titres fonciers, 5 rôles
+- `SafeLandNFT.sol` — ERC-721 titres fonciers, 5 rôles, hypothèques, mainlevées
 - `SafeLandRegistry.sol` — index central, stats globales
 - `SafeLandEscrow.sol` — escrow atomique, split fiscal 4%+1%+95%
 - `SafeLandFridda.sol` — ERC-1155 succession, 24 parts islamiques
 - `SafeLandJustice.sol` — multi-sig judiciaire, gel, burn & remint
+- `SafeLandTimelock.sol` — governance timelock (1j-30j délai, 14j grâce)
 
-### Backend (Express.js)
-- Routes : auth, properties, escrow, fridda, **justice** (nouveau), ipfs
+### Backend (Express.js) — 131 tests Jest
+- Routes : auth, properties, escrow, fridda, justice, ipfs, **timelock**, **bank** (nouveaux)
 - Middleware : JWT, role-based auth, rate-limit (100/15min), helmet, cors
-- WebSocket notifications
+- WebSocket notifications, input validation (`validators.js`, `database.js`)
 - ⚠️ Stockage utilisateurs en mémoire (Map) — pas de persistance
 
 ### Frontend (Next.js 14 App Router)
-- Pages : landing, dashboard, properties, escrow, fridda, justice, stats
-- i18n : I18nProvider context + LanguageSwitcher (FR/EN/AR avec RTL)
+- Pages : landing, dashboard, properties, escrow, fridda, justice, stats, **timelock**, **bank**
+- i18n : I18nProvider context + LanguageSwitcher (FR/EN/AR avec RTL) — clés complètes
 - Wallet : MetaMask via WalletContext
+- Navbar : liens conditionnels selon `role` (timelock=admin, bank=bank|admin)
+- Dashboard : cards conditionnelles par rôle
+
+### CI/CD (`.github/workflows/ci.yml`)
+- `contracts` — compile + hardhat test + gas report
+- `backend` — eslint + Jest (131 tests) avec env vars CI
+- `frontend` — npm ci + next build
+- `security` — npm audit (root, backend, frontend)
+- `slither` — analyse statique Solidity
+- `coverage` — hardhat coverage
+- `e2e` — Playwright tests (branch main seulement)
 
 ### Infra
 - Hardhat 2.22.x, optimizer 200 runs, viaIR=true
 - Docker : 4 services (hardhat, deployer, backend, frontend)
-- CI : `.github/workflows/ci.yml` — 6 jobs
-- TheGraph subgraph configuré
+- TheGraph subgraph : TimelockOperation entity + 24 events
 
 ---
 
-## 5. PROBLÈMES CONNUS
+## 4. PROBLÈMES CONNUS
 
 1. **Clé privée Hardhat en clair** dans docker-compose et blockchain.js — OK pour dev, à sécuriser pour prod
 2. **JWT secret fallback** faible (`safeland-dev-secret`) — utiliser .env en prod
 3. **Stockage mémoire** des nonces/users dans auth.js — à migrer vers SQLite/Redis
-4. **Frontend build** — fonctionne après nettoyage `.next/`, le standalone build est actif
+4. **Playwright E2E** — ne tourne pas sans serveur Next.js démarré (webServer config à ajouter)
 
 ---
 
-## 6. COMMANDES UTILES
+## 5. COMMANDES UTILES
 
 ```bash
-# Tests smart contracts (96 tests)
-cd /Users/imac/Desktop/safeland && npx hardhat test
+# Tests smart contracts
+npx hardhat test
 
 # Coverage
 npx hardhat coverage
 
+# Tests backend
+cd backend && npx jest --forceExit --coverage
+
 # Build frontend
-cd frontend && rm -rf .next && npx next build
+cd frontend && npm run build
 
-# Lint frontend
-cd frontend && npx next lint
-
-# Slither audit
-slither . --filter-paths "node_modules|@openzeppelin"
-
-# Docker
+# Docker complet
 docker-compose up --build
+
+# Déploiement Sepolia
+npx hardhat run scripts/deploy-sepolia.js --network sepolia
 ```
 
 ---
 
-## 7. FICHIERS CLÉS POUR LA REPRISE
+## 6. FICHIERS CLÉS POUR LA REPRISE
 
 | Fichier | Rôle |
 |---------|------|
-| `frontend/src/app/escrow/page.js` | Page à i18n-iser |
-| `frontend/src/app/fridda/page.js` | Page à i18n-iser |
-| `frontend/src/app/justice/page.js` | Page à i18n-iser + migrer vers apiCall |
-| `frontend/src/app/properties/page.js` | Page à i18n-iser |
-| `frontend/src/app/stats/page.js` | Page à i18n-iser |
-| `frontend/src/i18n/locales/fr.json` | Référence clés i18n |
-| `backend/src/routes/justice.js` | Routes Justice (nouveau, non commité) |
-| `test/` | Tests à étendre pour coverage branches |
+| `contracts/SafeLandTimelock.sol` | Contrat gouvernance timelock |
+| `backend/src/routes/timelock.js` | API admin timelock (schedule/execute/cancel) |
+| `backend/src/routes/bank.js` | API B2B banques (score/hypothèque/mainlevée) |
+| `frontend/src/app/timelock/page.js` | UI admin timelock |
+| `frontend/src/app/bank/page.js` | UI B2B banques (4 onglets) |
+| `frontend/src/i18n/locales/fr.json` | Référence clés i18n (complet) |
+| `.github/workflows/ci.yml` | Pipeline CI 7 jobs |
+| `subgraph/src/mappings/timelock.ts` | Mapping TheGraph timelock |
+

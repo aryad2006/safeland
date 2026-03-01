@@ -57,6 +57,19 @@ jobs:
       - name: Lint backend
         run: cd backend && npx eslint src/ --ext .js || true
 
+      - name: Run backend Jest tests
+        run: cd backend && npx jest --forceExit --coverage --coverageReporters=text-summary
+        env:
+          NODE_ENV: test
+          JWT_SECRET: ci-test-secret-32chars-minimum-ok
+          BLOCKCHAIN_RPC_URL: http://localhost:8545
+          CONTRACT_ADDRESS_NFT: "0x0000000000000000000000000000000000000001"
+          CONTRACT_ADDRESS_REGISTRY: "0x0000000000000000000000000000000000000002"
+          CONTRACT_ADDRESS_ESCROW: "0x0000000000000000000000000000000000000003"
+          CONTRACT_ADDRESS_FRIDDA: "0x0000000000000000000000000000000000000004"
+          CONTRACT_ADDRESS_JUSTICE: "0x0000000000000000000000000000000000000005"
+          CONTRACT_ADDRESS_TIMELOCK: "0x0000000000000000000000000000000000000006"
+
   # ─── Frontend Build ───────────────────────────────────
   frontend:
     name: Frontend Next.js
@@ -147,3 +160,48 @@ jobs:
         run: |
           echo "Coverage report generated in coverage/"
           cat coverage/coverage-summary.json 2>/dev/null || true
+
+  # ─── E2E Playwright (main branch only) ───────────────
+  e2e:
+    name: Playwright E2E
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [frontend]
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:3001/api
+          NEXT_PUBLIC_CHAIN_ID: "31337"
+
+      - name: Run E2E tests
+        run: npx playwright test --reporter=list
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:3001/api
+          NEXT_PUBLIC_CHAIN_ID: "31337"
+
+      - name: Upload Playwright report on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+          retention-days: 7

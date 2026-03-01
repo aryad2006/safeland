@@ -68,6 +68,16 @@ test.describe("Navigation", () => {
     await page.goto("/stats");
     await expect(page).toHaveURL("/stats");
   });
+
+  test("devrait naviguer vers Timelock", async ({ page }) => {
+    await page.goto("/timelock");
+    await expect(page).toHaveURL("/timelock");
+  });
+
+  test("devrait naviguer vers Bank", async ({ page }) => {
+    await page.goto("/bank");
+    await expect(page).toHaveURL("/bank");
+  });
 });
 
 test.describe("Responsive", () => {

@@ -4,8 +4,10 @@ import { useWallet } from "@/context/WalletContext";
 import { useI18n } from "@/i18n";
 import {
     BarChart3,
+    Building2,
     FileText,
     Home,
+    Lock,
     Scale,
     Shield,
     Users,
@@ -13,7 +15,7 @@ import {
 import Link from "next/link";
 
 export default function Dashboard() {
-  const { account, isConnected } = useWallet();
+  const { account, isConnected, role } = useWallet();
   const { t } = useI18n();
 
   const cards = [
@@ -52,6 +54,20 @@ export default function Dashboard() {
       href: "/stats",
       color: "from-amber-500 to-orange-600",
     },
+    ...(role === "admin" ? [{
+      title: t("timelock.title"),
+      description: t("dashboard.cards.timelock"),
+      icon: <Lock className="w-8 h-8" />,
+      href: "/timelock",
+      color: "from-slate-500 to-slate-700",
+    }] : []),
+    ...(role === "bank" || role === "admin" ? [{
+      title: t("bank.title"),
+      description: t("dashboard.cards.bank"),
+      icon: <Building2 className="w-8 h-8" />,
+      href: "/bank",
+      color: "from-blue-600 to-blue-800",
+    }] : []),
   ];
 
   return (
@@ -101,7 +117,7 @@ export default function Dashboard() {
       {/* Architecture Info */}
       <div className="mt-12 glass rounded-xl p-6">
         <h3 className="text-lg font-semibold mb-4">{t("dashboard.architecture")}</h3>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center text-sm">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-4 text-center text-sm">
           <div className="p-3 bg-green-50 rounded-lg">
             <div className="font-bold text-safeland-700">SafeLandNFT</div>
             <div className="text-gray-500">{t("dashboard.contracts.nft")}</div>
@@ -121,6 +137,10 @@ export default function Dashboard() {
           <div className="p-3 bg-red-50 rounded-lg">
             <div className="font-bold text-red-700">Justice</div>
             <div className="text-gray-500">{t("dashboard.contracts.justice")}</div>
+          </div>
+          <div className="p-3 bg-slate-50 rounded-lg">
+            <div className="font-bold text-slate-700">Timelock</div>
+            <div className="text-gray-500">{t("dashboard.contracts.timelock")}</div>
           </div>
         </div>
       </div>

@@ -8,19 +8,25 @@ import { useState } from "react";
 import LanguageSwitcher from "./LanguageSwitcher";
 import NotificationBell from "./NotificationBell";
 
-const NAV_KEYS = [
+const ALL_NAV_LINKS = [
   { href: "/dashboard", key: "nav.dashboard" },
   { href: "/properties", key: "nav.properties" },
   { href: "/escrow", key: "nav.escrow" },
   { href: "/fridda", key: "nav.fridda" },
   { href: "/justice", key: "nav.justice" },
   { href: "/stats", key: "nav.stats" },
+  { href: "/timelock", key: "nav.timelock", roles: ["admin"] },
+  { href: "/bank", key: "nav.bank", roles: ["bank", "admin"] },
 ];
 
 export default function Navbar() {
   const { account, role, isConnected, connect, disconnect } = useWallet();
   const { t } = useI18n();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const navLinks = ALL_NAV_LINKS.filter(
+    (l) => !l.roles || (isConnected && l.roles.includes(role))
+  );
 
   return (
     <nav className="bg-white/90 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
@@ -36,7 +42,7 @@ export default function Navbar() {
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-6">
-            {NAV_KEYS.map((link) => (
+            {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -87,7 +93,7 @@ export default function Navbar() {
       {/* Mobile Nav */}
       {mobileOpen && (
         <div className="md:hidden border-t border-gray-200 bg-white py-4 px-4 space-y-3">
-          {NAV_KEYS.map((link) => (
+          {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}

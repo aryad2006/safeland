@@ -83,7 +83,7 @@ Env var backend : `TIMELOCK_ADDRESS` (+ NFT/ESCROW/FRIDDA/JUSTICE/REGISTRY_ADDRE
 | 9 | 71c3514 | Fix useState->useEffect timelock page, WS auto-refresh timelock, NotificationBell labels Timelock |
 | 10 | f837b58 | ESLint backend (0 warn), WS auto-refresh properties+escrow, MetaMask chainChanged reload, useNotifications reconnect fix |
 
-## Etat session 10 (HEAD = f837b58)
+## Etat session 10 (HEAD = e58d881)
 
 - `backend/eslint.config.js` : flat config ESLint 10, 0 erreurs/warnings
 - `backend/package.json` : script `lint` + eslint/`@eslint/js` en devDeps
@@ -95,7 +95,27 @@ Env var backend : `TIMELOCK_ADDRESS` (+ NFT/ESCROW/FRIDDA/JUSTICE/REGISTRY_ADDRE
 
 ## Prochaines etapes
 
-- [ ] Deploiement Sepolia + npm run update-env:write (necessite ALCHEMY_SEPOLIA_URL + cle privee)
-- [ ] TheGraph : deploiement reseau decentralise (subgraph.yaml a jour, attendre adresses Sepolia)
-- [ ] Slither : analyse securite (necessite Python >= 3.8 + pip install slither-analyzer)
-- [ ] Frontend : tests E2E Playwright sur interactions wallet reelles (MetaMask extension)
+### Interne (faisable sans dependances externes)
+
+- [ ] WS auto-refresh pages bank, justice, fridda (meme pattern que properties/escrow/timelock)
+  - bank : channels `bank.*`
+  - justice : channels `justice.action`, `justice.executed`
+  - fridda : channels `succession.opened`, `succession.finalized`
+- [ ] `npx hardhat coverage` : rapport Istanbul lignes/branches/fonctions par contrat
+- [ ] `hardhat-gas-reporter` : cout gas par fonction (utile avant deploy mainnet)
+- [ ] NotificationBell : ajouter labels pour events bank, justice, fridda (meme pattern Timelock session 9)
+
+### Externe (dependances requises)
+
+- [ ] Deploiement Sepolia (necessite ALCHEMY_SEPOLIA_URL + cle privee avec ETH de test)
+  ```bash
+  npx hardhat run scripts/deploy-sepolia.js --network sepolia
+  npm run update-env:write
+  ```
+- [ ] TheGraph Studio (attendre adresses Sepolia, mettre a jour subgraph.yaml puis `graph deploy`)
+- [ ] Slither securite (necessite Python >= 3.8)
+  ```bash
+  pip install slither-analyzer
+  npx slither contracts/ --solc-remaps "@openzeppelin/=node_modules/@openzeppelin/"
+  ```
+- [ ] Tests E2E Playwright sur interactions wallet reelles (extension MetaMask dans Chromium)

@@ -80,10 +80,22 @@ Env var backend : `TIMELOCK_ADDRESS` (+ NFT/ESCROW/FRIDDA/JUSTICE/REGISTRY_ADDRE
 | 6 | f0d7405 | ReentrancyGuard Timelock, ipfs 400 fix, 15 tests IPFS, 30 E2E fonctionnels |
 | 7 | a705cc1 | sync-abis.js, ABI 54->55 entries apres ReentrancyGuard |
 | 8 | 6ec9983 | _listenTimelock WS, TIMELOCK_ADDRESS index.js, 21 tests notifications, 167 total |
+| 9 | 71c3514 | Fix useState->useEffect timelock page, WS auto-refresh timelock, NotificationBell labels Timelock |
+| 10 | f837b58 | ESLint backend (0 warn), WS auto-refresh properties+escrow, MetaMask chainChanged reload, useNotifications reconnect fix |
+
+## Etat session 10 (HEAD = f837b58)
+
+- `backend/eslint.config.js` : flat config ESLint 10, 0 erreurs/warnings
+- `backend/package.json` : script `lint` + eslint/`@eslint/js` en devDeps
+- `.github/workflows/ci.yml` : lint step utilise `npm run lint` (plus de `|| true`)
+- `frontend/src/hooks/useNotifications.js` : pattern `channelsRef` -- inline arrays desormais sécurisés sans `useMemo`
+- `frontend/src/context/WalletContext.js` : `handleChainChanged` fait `window.location.reload()` (spec MetaMask)
+- `frontend/src/app/properties/page.js` : auto-refresh WS sur `property.created/transferred/frozen`
+- `frontend/src/app/escrow/page.js` : auto-refresh WS sur `deal.created/completed/cancelled/escrow`
 
 ## Prochaines etapes
 
-- [ ] Deploiement Sepolia + npm run update-env:write
-- [ ] TheGraph : deploiement reseau decentralise (subgraph.yaml a jour)
-- [ ] Slither : analyse securite (necessite Python + slither-analyzer)
-- [ ] Frontend : tests E2E Playwright sur interactions wallet reelles
+- [ ] Deploiement Sepolia + npm run update-env:write (necessite ALCHEMY_SEPOLIA_URL + cle privee)
+- [ ] TheGraph : deploiement reseau decentralise (subgraph.yaml a jour, attendre adresses Sepolia)
+- [ ] Slither : analyse securite (necessite Python >= 3.8 + pip install slither-analyzer)
+- [ ] Frontend : tests E2E Playwright sur interactions wallet reelles (MetaMask extension)

@@ -21,7 +21,7 @@ contract SafeLandRegistry is AccessControlUpgradeable, UUPSUpgradeable {
         uint256 totalTransactions;
         uint256 totalEncumbrances;
         uint256 fraudAttemptsPrevented;
-        uint256 justicOverrides;
+        uint256 justiceOverrides;
     }
 
     GlobalStats public stats;
@@ -75,7 +75,7 @@ contract SafeLandRegistry is AccessControlUpgradeable, UUPSUpgradeable {
         unchecked { stats.totalTransactions++; }
 
         if (keccak256(bytes(txType)) == _JUSTICE_OVERRIDE_HASH) {
-            unchecked { stats.justicOverrides++; }
+            unchecked { stats.justiceOverrides++; }
         }
 
         emit TransactionRecorded(tokenId, from, to, txType);
@@ -120,4 +120,7 @@ contract SafeLandRegistry is AccessControlUpgradeable, UUPSUpgradeable {
     }
 
     function _authorizeUpgrade(address) internal override onlyRole(ADMIN_ROLE) {}
+
+    // SC-M1: Storage gap pour futures upgrades
+    uint256[50] private __gap;
 }

@@ -144,8 +144,14 @@ router.get("/", async (req, res, next) => {
 
     let tokenIds = [];
     if (city) {
-      tokenIds = await registry.getPropertiesByCity(city);
+      if (typeof city !== "string" || city.trim().length === 0) {
+        return res.status(400).json({ error: "city: paramètre invalide" });
+      }
+      tokenIds = await registry.getPropertiesByCity(city.trim());
     } else if (owner) {
+      if (typeof owner !== "string" || !isValidAddress(owner)) {
+        return res.status(400).json({ error: "owner: adresse Ethereum invalide" });
+      }
       tokenIds = await registry.getPropertiesByOwner(owner);
     } else {
       const stats = await registry.getGlobalStats();

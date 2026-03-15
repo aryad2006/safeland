@@ -129,7 +129,7 @@ export default function TimelockPage() {
         body: JSON.stringify({
           target: operation.target,
           value: operation.value,
-          data: "0x",
+          data: operation.data || "0x",
           salt: lookupId,
         }),
       });

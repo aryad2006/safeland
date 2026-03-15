@@ -111,6 +111,7 @@ contract SafeLandEscrow is
         uint256 salePrice,
         bytes32 documentHash
     ) external onlyRole(NOTARY_ROLE) whenNotPaused returns (uint256) {
+        require(seller != buyer, "Escrow: seller is buyer");
         require(nftContract.ownerOf(tokenId) == seller, "Escrow: not owner");
         require(nftContract.canTransfer(tokenId), "Escrow: token not transferable");
         require(salePrice > 0, "Escrow: zero price");
@@ -191,12 +192,8 @@ contract SafeLandEscrow is
         deal.completedAt = block.timestamp;
         _tokenToDeal[tokenId] = 0;
 
-        // Interactions — paiements
-        _safeTransfer(dgiWallet, dgiAmount);
-        _safeTransfer(ancfccWallet, ancfccAmount);
-        _safeTransfer(seller, sellerNet);
-
-        // Transfert du NFT
+        // SC-C2: Transfert NFT AVANT les paiements
+        // Si transferProperty reverte, tout est annulé (aucun paiement envoyé)
         nftContract.transferProperty(
             tokenId,
             buyer,
@@ -204,6 +201,11 @@ contract SafeLandEscrow is
             docHash,
             notary
         );
+
+        // Paiements — après transfert NFT réussi
+        _safeTransfer(dgiWallet, dgiAmount);
+        _safeTransfer(ancfccWallet, ancfccAmount);
+        _safeTransfer(seller, sellerNet);
 
         emit DealCompleted(dealId, dgiAmount, ancfccAmount, sellerNet);
     }
@@ -268,4 +270,7 @@ contract SafeLandEscrow is
     }
 
     function _authorizeUpgrade(address) internal override onlyRole(ADMIN_ROLE) {}
+
+    // SC-M1: Storage gap pour futures upgrades
+    uint256[50] private __gap;
 }

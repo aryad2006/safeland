@@ -142,13 +142,13 @@ contract SafeLandJustice is
         require(!action.executed, "Justice: already executed");
         require(action.signatures >= requiredSignatures, "Justice: not enough signatures");
 
-        action.executed = true;
-
         // Cache storage reads
         uint256 tokenId = action.tokenId;
         bytes32 judgmentHash = action.judgmentHash;
         ActionType actionType = action.actionType;
 
+        // SC-M2: Appels externes AVANT de marquer executed
+        // Si l'appel reverte, executed reste false
         if (actionType == ActionType.Freeze) {
             nftContract.freezeByJustice(tokenId, judgmentHash);
         } else {
@@ -160,6 +160,8 @@ contract SafeLandJustice is
                 action.newUri
             );
         }
+
+        action.executed = true;
 
         emit ActionExecuted(actionId, actionType, tokenId);
     }
@@ -196,6 +198,27 @@ contract SafeLandJustice is
         return recoveryId;
     }
 
+    // ─── Exécuter un recovery ─────────────────────────────
+    /**
+     * @notice SC-C3: Exécute une récupération de wallet après vérification
+     */
+    function executeRecovery(uint256 recoveryId) external onlyRole(JUDGE_ROLE) nonReentrant {
+        RecoveryRequest storage recovery = _recoveries[recoveryId];
+        require(!recovery.executed, "Justice: recovery already executed");
+        require(recovery.newWallet != address(0), "Justice: invalid recovery");
+
+        nftContract.justiceOverride(
+            recovery.tokenId,
+            recovery.newWallet,
+            bytes32(recoveryId),
+            ""
+        );
+
+        recovery.executed = true;
+
+        emit RecoveryExecuted(recoveryId, recovery.tokenId, recovery.newWallet);
+    }
+
     // ─── Vues ─────────────────────────────────────────────
     function getAction(uint256 actionId) external view returns (
         uint256 tokenId,
@@ -223,4 +246,7 @@ contract SafeLandJustice is
     }
 
     function _authorizeUpgrade(address) internal override onlyRole(ADMIN_ROLE) {}
+
+    // SC-M1: Storage gap pour futures upgrades
+    uint256[50] private __gap;
 }

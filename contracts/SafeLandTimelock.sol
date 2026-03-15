@@ -180,6 +180,8 @@ contract SafeLandTimelock is AccessControlUpgradeable, UUPSUpgradeable, Reentran
         uint256 delay,
         string calldata description
     ) external onlyRole(PROPOSER_ROLE) returns (bytes32) {
+        require(target != address(0), "Timelock: zero target");
+
         if (delay < MIN_DELAY || delay > MAX_DELAY) {
             revert TimelockInvalidDelay(delay, MIN_DELAY, MAX_DELAY);
         }
@@ -268,4 +270,7 @@ contract SafeLandTimelock is AccessControlUpgradeable, UUPSUpgradeable, Reentran
 
     // ─── UUPS ─────────────────────────────────────────────
     function _authorizeUpgrade(address) internal override onlyRole(ADMIN_ROLE) {}
+
+    // SC-M1: Storage gap pour futures upgrades
+    uint256[50] private __gap;
 }

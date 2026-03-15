@@ -294,4 +294,7 @@ contract SafeLandFridda is
     }
 
     function _authorizeUpgrade(address) internal override onlyRole(ADMIN_ROLE) {}
+
+    // SC-M1: Storage gap pour futures upgrades
+    uint256[50] private __gap;
 }

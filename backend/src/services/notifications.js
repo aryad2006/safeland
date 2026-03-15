@@ -188,6 +188,10 @@ class NotificationService {
 
   async startListening(contractAddresses) {
     try {
+      // BE-C4: Cleanup anciens listeners avant reconnexion
+      if (this.provider) {
+        this.provider.removeAllListeners();
+      }
       this.provider = new ethers.JsonRpcProvider(this.config.rpcUrl);
       const network = await this.provider.getNetwork();
       console.log(`⛓️  Connecté à la blockchain (chainId: ${network.chainId})`);

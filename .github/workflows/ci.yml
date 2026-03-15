@@ -129,13 +129,16 @@ jobs:
           cache: "npm"
 
       - name: Audit root
-        run: npm audit --audit-level=high || true
+        run: npm audit --audit-level=high
+        continue-on-error: false
 
       - name: Audit backend
-        run: cd backend && npm audit --audit-level=high || true
+        run: cd backend && npm audit --audit-level=high
+        continue-on-error: false
 
       - name: Audit frontend
-        run: cd frontend && npm audit --audit-level=high || true
+        run: cd frontend && npm audit --audit-level=high
+        continue-on-error: false
 
   # ─── Slither Static Analysis ──────────────────────────
   slither:

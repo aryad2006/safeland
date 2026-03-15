@@ -67,12 +67,15 @@ function isAddressArray(value) {
   return Array.isArray(value) && value.length > 0 && value.every(isValidAddress);
 }
 
-// ─── Tableau d'entiers positifs ───────────────────────────
+// ─── Tableau d'entiers strictement positifs (> 0) ─────────
 function isPositiveIntegerArray(value) {
   return (
     Array.isArray(value) &&
     value.length > 0 &&
-    value.every((v) => isPositiveInteger(v) && Number(v) > 0)
+    value.every((v) => {
+      const n = Number(v);
+      return Number.isInteger(n) && n > 0;
+    })
   );
 }
 

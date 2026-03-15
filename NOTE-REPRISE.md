@@ -5,12 +5,13 @@
 
 | Couche | Etat |
 |---|---|
-| Smart contracts | OK 6 contrats - 206 tests |
-| Backend Express | OK 8 routes + WS notifications - 167 tests (7 suites) |
+| Smart contracts | 6 contrats UUPS + __gap[50] — 206 tests OK |
+| Backend Express | 8 routes + WS notifications — 167 tests (7 suites) OK |
 | Subgraph TheGraph | OK codegen + build |
-| Frontend Next.js | OK 9 pages + NotificationBell + useNotifications |
-| CI/CD GitHub Actions | OK 7 jobs |
-| Docker Compose | OK SQLite volume + NEXT_PUBLIC_* + contrats backend |
+| Frontend Next.js | 9 pages + NotificationBell + useNotifications |
+| CI/CD GitHub Actions | 7 jobs (npm audit strict, plus de || true) |
+| Docker Compose | SQLite volume + secrets interpoles via ${VAR} |
+| Documentation | CDC V3, Livre Blanc V2, Marketing, Guide Utilisateurs, Audit, B2G (10 docs) |
 
 **Total tests : 373 (206 SC + 167 backend)**
 
@@ -61,12 +62,16 @@ Env var backend : `TIMELOCK_ADDRESS` (+ NFT/ESCROW/FRIDDA/JUSTICE/REGISTRY_ADDRE
 
 - BOM PowerShell : Out-File -Encoding utf8 ajoute un BOM -> utiliser [System.IO.File]::WriteAllText avec UTF8Encoding::new($false)
 - validateBody retourne { error, details: [] } (cle 'details', pas 'errors')
-- isPositiveInteger : accepte > 0, rejette 0
+- isPositiveInteger : accepte >= 0 (inclut 0), isPositiveIntegerArray : strictement > 0
 - JWT secret : toujours passer par security.js, pas process.env directement
 - SQLite WAL mode, DB_PATH depuis l'env, volume Docker backend_data
 - SafeLandTimelock.schedule() : PAS de param `predecessor`, interface = (target, value, data, salt, delay, description)
+- SafeLandTimelock.schedule() : require(target != address(0)) ajoute session 12
 - SafeLandTimelock constants : MIN_DELAY(), MAX_DELAY(), GRACE_PERIOD() -- appeles comme des fonctions
 - Apres `npx hardhat compile` : lancer `npm run sync-abis` pour syncer subgraph + frontend
+- SafeLandRegistry.GlobalStats : champ renomme `justiceOverrides` (anciennement `justicOverrides`, typo corrige session 12)
+- SafeLandJustice.executeRecovery() : nouvelle fonction ajoutee session 12 pour completer Social Recovery
+- docker-compose.yml : secrets interpoles via ${PRIVATE_KEY:-default}, creer .env.docker pour surcharger
 
 ## Historique des sessions
 
@@ -81,41 +86,79 @@ Env var backend : `TIMELOCK_ADDRESS` (+ NFT/ESCROW/FRIDDA/JUSTICE/REGISTRY_ADDRE
 | 7 | a705cc1 | sync-abis.js, ABI 54->55 entries apres ReentrancyGuard |
 | 8 | 6ec9983 | _listenTimelock WS, TIMELOCK_ADDRESS index.js, 21 tests notifications, 167 total |
 | 9 | 71c3514 | Fix useState->useEffect timelock page, WS auto-refresh timelock, NotificationBell labels Timelock |
-| 10 | f837b58 | ESLint backend (0 warn), WS auto-refresh properties+escrow, MetaMask chainChanged reload, useNotifications reconnect fix |
+| 10 | f837b58 | ESLint backend (0 warn), WS auto-refresh properties+escrow, MetaMask chainChanged reload |
+| 11 | 8df3f7d | Audit technique complet (78 findings), CDC V3, Livre Blanc V2, Marketing, Guide Utilisateurs, Dossier B2G (10 docs) |
+| 12 | (HEAD) | Fix 11 issues critiques/majeurs (contrats + backend + frontend + infra), 373 tests verts |
 
-## Etat session 10 (HEAD = e58d881)
+## Corrections session 12 (audit -> fix)
 
-- `backend/eslint.config.js` : flat config ESLint 10, 0 erreurs/warnings
-- `backend/package.json` : script `lint` + eslint/`@eslint/js` en devDeps
-- `.github/workflows/ci.yml` : lint step utilise `npm run lint` (plus de `|| true`)
-- `frontend/src/hooks/useNotifications.js` : pattern `channelsRef` -- inline arrays desormais sécurisés sans `useMemo`
-- `frontend/src/context/WalletContext.js` : `handleChainChanged` fait `window.location.reload()` (spec MetaMask)
-- `frontend/src/app/properties/page.js` : auto-refresh WS sur `property.created/transferred/frozen`
-- `frontend/src/app/escrow/page.js` : auto-refresh WS sur `deal.created/completed/cancelled/escrow`
+### Smart Contracts
+- `SafeLandEscrow.notaryComplete()` : transfert NFT AVANT les paiements (CEI strict)
+- `SafeLandEscrow.createDeal()` : ajout `require(seller != buyer)`
+- `SafeLandJustice.executeAction()` : `action.executed = true` deplace APRES appels NFT
+- `SafeLandJustice.executeRecovery()` : nouvelle fonction (Social Recovery complete)
+- `SafeLandRegistry.GlobalStats` : renommage `justicOverrides` -> `justiceOverrides`
+- `SafeLandTimelock.schedule()` : ajout `require(target != address(0))`
+- 6 contrats : ajout `uint256[50] private __gap` (storage gap pour upgrades)
+
+### Backend
+- `routes/properties.js` GET / : validation req.query (city string, owner adresse)
+- `utils/validators.js` : isPositiveIntegerArray clarifie (strictement > 0)
+- `services/notifications.js` : removeAllListeners() avant retry WS (fix memory leak)
+
+### Frontend
+- `timelock/page.js` : `data: operation.data || "0x"` (plus hardcode)
+
+### Infra
+- `docker-compose.yml` : secrets interpoles `${PRIVATE_KEY:-default}` au lieu de hardcode
+- `.github/workflows/ci.yml` : npm audit strict (retire || true)
+
+## Documentation generee (session 11)
+
+| Document | Emplacement |
+|---|---|
+| Audit Technique Complet | `docs/AUDIT-TECHNIQUE-COMPLET.md` |
+| CDC Complet V3 | `docs/CDC-COMPLET-V3.md` |
+| Livre Blanc V2 | `docs/LIVRE-BLANC-V2.md` |
+| Livre Marketing | `docs/LIVRE-MARKETING.md` |
+| Guide Utilisateurs | `docs/GUIDE-UTILISATEURS.md` |
+| Dossier B2G (10 docs) | `B2G/00-INDEX-DOSSIER-B2G.md` a `B2G/09-MODELE-ECONOMIQUE.md` |
+| Exports DOCX + ODT | `C:\Users\USER\docs-safeland\` (30 fichiers) |
+| Scripts conversion | `scripts/convert-docs.py`, `scripts/convert-odt.py` |
 
 ## Prochaines etapes
 
-### Interne (faisable sans dependances externes)
+### Court terme (faisable sans dependances)
 
+- [ ] Sync ABIs apres modif contrats : `npm run compile && npm run sync-abis`
+- [ ] Tests backend manquants : ecrire tests pour routes escrow, fridda, justice, properties (couverture actuelle ~40%)
 - [ ] WS auto-refresh pages bank, justice, fridda (meme pattern que properties/escrow/timelock)
   - bank : channels `bank.*`
   - justice : channels `justice.action`, `justice.executed`
   - fridda : channels `succession.opened`, `succession.finalized`
-- [ ] `npx hardhat coverage` : rapport Istanbul lignes/branches/fonctions par contrat
-- [ ] `hardhat-gas-reporter` : cout gas par fonction (utile avant deploy mainnet)
-- [ ] NotificationBell : ajouter labels pour events bank, justice, fridda (meme pattern Timelock session 9)
+- [ ] NotificationBell : labels i18n (deplacer du francais hardcode vers fr.json/en.json/ar.json)
+- [ ] Fridda <-> NFT sync (SC-M3) : executeProposal() doit appeler transferProperty() si vote de vente
+- [ ] Nonce avec adresse (BE-M1) : inclure address dans le message signe
+- [ ] `npx hardhat coverage` : rapport Istanbul lignes/branches/fonctions
+- [ ] `hardhat-gas-reporter` : cout gas par fonction
 
-### Externe (dependances requises)
+### Moyen terme (dependances requises)
 
-- [ ] Deploiement Sepolia (necessite ALCHEMY_SEPOLIA_URL + cle privee avec ETH de test)
+- [ ] Deploy Sepolia (ALCHEMY_SEPOLIA_URL + cle privee avec ETH test)
   ```bash
   npx hardhat run scripts/deploy-sepolia.js --network sepolia
-  npm run update-env:write
+  npm run update-env:write && npm run sync-abis
   ```
-- [ ] TheGraph Studio (attendre adresses Sepolia, mettre a jour subgraph.yaml puis `graph deploy`)
-- [ ] Slither securite (necessite Python >= 3.8)
-  ```bash
-  pip install slither-analyzer
-  npx slither contracts/ --solc-remaps "@openzeppelin/=node_modules/@openzeppelin/"
-  ```
-- [ ] Tests E2E Playwright sur interactions wallet reelles (extension MetaMask dans Chromium)
+- [ ] TheGraph Studio (adresses Sepolia dans subgraph.yaml + startBlocks)
+- [ ] Audit externe CertiK / Trail of Bits (~400K MAD)
+- [ ] JWT httpOnly cookies (remplacer localStorage, refactoring CORS)
+- [ ] Tests E2E Playwright avec MetaMask reel
+- [ ] Migration SQLite -> PostgreSQL (production multi-instance)
+
+### Long terme (pre-production)
+
+- [ ] Monitoring on-chain (Forta / OpenZeppelin Defender)
+- [ ] Convention PPP signature ANCFCC
+- [ ] Pilote 3 conservations (Casablanca, Rabat, Marrakech)
+- [ ] Formation 20 agents ANCFCC
+- [ ] Certification CNDP + DGSSI

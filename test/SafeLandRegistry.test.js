@@ -95,7 +95,7 @@ describe("SafeLandRegistry", function () {
       await registry.connect(operator).registerProperty(0, "Casablanca", "residential", user.address);
       await registry.connect(operator).recordTransaction(0, user.address, admin.address, "justice_override");
       const stats = await registry.getStats();
-      expect(stats.justicOverrides).to.equal(1);
+      expect(stats.justiceOverrides).to.equal(1);
     });
 
     it("devrait retirer le token du propriétaire lors d un transfer", async function () {
@@ -144,11 +144,11 @@ describe("SafeLandRegistry", function () {
       expect(stats.totalTransactions).to.equal(1);
     });
 
-    it("devrait gérer un txType non justice_override sans incrémenter justicOverrides", async function () {
+    it("devrait gérer un txType non justice_override sans incrémenter justiceOverrides", async function () {
       await registry.connect(operator).recordTransaction(0, admin.address, user.address, "inheritance");
       const stats = await registry.getStats();
       expect(stats.totalTransactions).to.equal(1);
-      expect(stats.justicOverrides).to.equal(0);
+      expect(stats.justiceOverrides).to.equal(0);
     });
 
     it("devrait gérer _removeFromOwner quand le token n est pas dans la liste du propriétaire", async function () {

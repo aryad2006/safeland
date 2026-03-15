@@ -120,6 +120,8 @@ contract SafeLandNFT is
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(ADMIN_ROLE, admin);
         _grantRole(UPGRADER_ROLE, admin);
+        // _tokenIdCounter reste à 0, premier mint donne tokenId=1 (après ++)
+        // 0 sert de sentinelle "inexistant" dans _titreFoncierToToken
     }
 
     // ─── Création de propriété ────────────────────────────
@@ -407,6 +409,9 @@ contract SafeLandNFT is
 
     // ─── Overrides requis ─────────────────────────────────
     function _authorizeUpgrade(address) internal override onlyRole(UPGRADER_ROLE) {}
+
+    // SC-M1: Storage gap pour futures upgrades
+    uint256[50] private __gap;
 
     function _update(address to, uint256 tokenId, address auth)
         internal override(ERC721Upgradeable, ERC721EnumerableUpgradeable)

@@ -88,7 +88,52 @@ Env var backend : `TIMELOCK_ADDRESS` (+ NFT/ESCROW/FRIDDA/JUSTICE/REGISTRY_ADDRE
 | 9 | 71c3514 | Fix useState->useEffect timelock page, WS auto-refresh timelock, NotificationBell labels Timelock |
 | 10 | f837b58 | ESLint backend (0 warn), WS auto-refresh properties+escrow, MetaMask chainChanged reload |
 | 11 | 8df3f7d | Audit technique complet (78 findings), CDC V3, Livre Blanc V2, Marketing, Guide Utilisateurs, Dossier B2G (10 docs) |
-| 12 | (HEAD) | Fix 11 issues critiques/majeurs (contrats + backend + frontend + infra), 373 tests verts |
+| 12 | 4192ccd | Fix 11 issues critiques/majeurs (contrats + backend + frontend + infra), 373 tests verts |
+| 13 | (HEAD) | Fork SafeLand Syrie + Guide strategique multi-pays + Appchain L2 |
+
+## Session 13 — Fork Syrie + Strategie multi-pays
+
+### SafeLand Syrie (c:\Users\USER\Documents\safeland-syrie)
+
+Fork complet adapte au contexte post-conflit syrien. Projet standalone dans un dossier separe.
+
+**Contrats adaptes/crees :**
+- `SafeLandEscrow.sol` — Fiscalite syrienne : Mutation 3% + Cadastre 2.5% + Timbre 0.5% (3 wallets)
+- `SafeLandWiratha.sol` — Succession hanafite (120 parts, quorum 3/4). Remplace SafeLandFridda
+- `SafeLandReconstruction.sol` — **NOUVEAU** (~350 lignes) : revendications post-conflit, contestation 90j, verification multi-sig 3/5, mint NFT. Conforme Principes Pinheiro (ONU)
+
+**Documentation :**
+- `docs/CDC-SAFELAND-SYRIE.md` — CDC complet 17 chapitres (~900 lignes)
+- `B2G-Syrie/` — 4 documents institutionnels (Dir. Cadastre, UN-Habitat, Note Reconstruction)
+- `NOTE-REPRISE.md` — Note technique avec 12 etapes de travail restant (~16-21h)
+
+**Ce qui reste a faire dans safeland-syrie :**
+Voir `c:\Users\USER\Documents\safeland-syrie\NOTE-REPRISE.md` pour le detail complet.
+Resume : adapter NFT (champs syriens), Registry (mohafaza), Justice (WarRestitution),
+deploy.js (7 contrats), tests, backend, frontend, subgraph.
+
+### Guide strategique multi-pays
+
+Document strategique complet pour deployer SafeLand dans N pays : `docs/GUIDE-STRATEGIQUE-MULTI-PAYS.md`
+
+**7 sources de revenus :**
+1. Licence initiale (one-shot) — 600K-1.7M USD/pays
+2. **Appchain L2 dediee** (recurrent) — deployer un Layer 2 souverain par pays (OP Stack, Avalanche Subnet, Polygon CDK). Le pays a sa chain, tu operes l'infra. Revenue : gas + abonnement 50-200K USD/an/pays
+3. Platform fee 0.1% (recurrent, smart contract) — automatique, proportionnel au volume
+4. SaaS Admin dashboard (recurrent, abonnement) — monitoring, alertes, IA fraude, reporting
+5. Support technique (recurrent, contrat)
+6. Modules vendables (ponctuel) — Reconstruction, Tasaluh, Refugees, IA, Marketplace, Mobile...
+7. Conseil et integration (ponctuel)
+
+**Architecture template multi-pays :**
+- 1 template prive (jamais livre) avec generateur `generate.js`
+- 1 fichier JSON par pays (taux, roles, succession, regions, modules)
+- Modules specifiques activables par pays (reconstruction, tasaluh, refugees, etc.)
+- Chaque fork genere est 100% standalone — le pays est souverain
+
+**Top 10 pays cibles :** Egypte, Jordanie, Ukraine, Irak, Liban, Tunisie, RDC, Colombie, Nigeria, Pakistan
+
+**Projection :** 3 pays An 1 (5M USD) → 7 pays An 2 (12M USD) → 12 pays An 3 (21M USD)
 
 ## Corrections session 12 (audit -> fix)
 
@@ -123,8 +168,17 @@ Env var backend : `TIMELOCK_ADDRESS` (+ NFT/ESCROW/FRIDDA/JUSTICE/REGISTRY_ADDRE
 | Livre Marketing | `docs/LIVRE-MARKETING.md` |
 | Guide Utilisateurs | `docs/GUIDE-UTILISATEURS.md` |
 | Dossier B2G (10 docs) | `B2G/00-INDEX-DOSSIER-B2G.md` a `B2G/09-MODELE-ECONOMIQUE.md` |
+| Guide Strategique Multi-Pays | `docs/GUIDE-STRATEGIQUE-MULTI-PAYS.md` |
 | Exports DOCX + ODT | `C:\Users\USER\docs-safeland\` (30 fichiers) |
 | Scripts conversion | `scripts/convert-docs.py`, `scripts/convert-odt.py` |
+
+## Projets derives
+
+| Projet | Emplacement | Etat |
+|--------|-------------|------|
+| SafeLand Maroc (original) | `c:\Users\USER\Documents\safeland` | 92% — 373 tests, pret pour Sepolia |
+| SafeLand Syrie (fork) | `c:\Users\USER\Documents\safeland-syrie` | ~40% — contrats adaptes, backend/frontend a adapter |
+| Template multi-pays | A construire | 0% — voir Guide Strategique |
 
 ## Prochaines etapes
 

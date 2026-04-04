@@ -35,6 +35,10 @@ contract SafeLandEscrow is
     uint256 public constant ANCFCC_FEE_BPS = 100;     // 1% conservation foncière
     uint256 public constant BPS_DENOMINATOR = 10000;
 
+    // ─── Platform fee (configurable, revenue operateur) ──
+    uint256 public platformFeeBps;                     // 0-100 BPS (0-1%), defaut 10 = 0.1%
+    address public platformWallet;
+
     // ─── Adresses de collecte ─────────────────────────────
     address public dgiWallet;       // Trésor Public (DGI)
     address public ancfccWallet;    // ANCFCC
@@ -68,7 +72,9 @@ contract SafeLandEscrow is
     event SellerSigned(uint256 indexed dealId);
     event BuyerFunded(uint256 indexed dealId, uint256 amount);
     event NotaryValidated(uint256 indexed dealId);
-    event DealCompleted(uint256 indexed dealId, uint256 dgiAmount, uint256 ancfccAmount, uint256 sellerNet);
+    event DealCompleted(uint256 indexed dealId, uint256 dgiAmount, uint256 ancfccAmount, uint256 platformFee, uint256 sellerNet);
+    event PlatformFeeCollected(uint256 indexed dealId, uint256 amount, address wallet);
+    event PlatformFeeUpdated(uint256 oldBps, uint256 newBps);
     event DealCancelled(uint256 indexed dealId, string reason);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -177,14 +183,16 @@ contract SafeLandEscrow is
         bytes32 docHash = deal.documentHash;
         address notary = deal.notary;
 
-        // Fractionnement fiscal At-the-Source
+        // Fractionnement fiscal At-the-Source + platform fee
         uint256 dgiAmount;
         uint256 ancfccAmount;
+        uint256 platformFee;
         uint256 sellerNet;
         unchecked {
             dgiAmount = (price * DGI_FEE_BPS) / BPS_DENOMINATOR;
             ancfccAmount = (price * ANCFCC_FEE_BPS) / BPS_DENOMINATOR;
-            sellerNet = price - dgiAmount - ancfccAmount;
+            platformFee = (price * platformFeeBps) / BPS_DENOMINATOR;
+            sellerNet = price - dgiAmount - ancfccAmount - platformFee;
         }
 
         // Effects avant interactions (CEI pattern)
@@ -192,8 +200,7 @@ contract SafeLandEscrow is
         deal.completedAt = block.timestamp;
         _tokenToDeal[tokenId] = 0;
 
-        // SC-C2: Transfert NFT AVANT les paiements
-        // Si transferProperty reverte, tout est annulé (aucun paiement envoyé)
+        // Transfert NFT AVANT les paiements (CEI strict)
         nftContract.transferProperty(
             tokenId,
             buyer,
@@ -202,12 +209,19 @@ contract SafeLandEscrow is
             notary
         );
 
-        // Paiements — après transfert NFT réussi
+        // Paiements — apres transfert NFT reussi
         _safeTransfer(dgiWallet, dgiAmount);
         _safeTransfer(ancfccWallet, ancfccAmount);
+        if (platformFee > 0 && platformWallet != address(0)) {
+            _safeTransfer(platformWallet, platformFee);
+            emit PlatformFeeCollected(dealId, platformFee, platformWallet);
+        } else {
+            sellerNet += platformFee; // Si pas de platform wallet, tout au vendeur
+            platformFee = 0;
+        }
         _safeTransfer(seller, sellerNet);
 
-        emit DealCompleted(dealId, dgiAmount, ancfccAmount, sellerNet);
+        emit DealCompleted(dealId, dgiAmount, ancfccAmount, platformFee, sellerNet);
     }
 
     // ─── Annulation ───────────────────────────────────────
@@ -258,6 +272,19 @@ contract SafeLandEscrow is
     function setAncfccWallet(address wallet) external onlyRole(ADMIN_ROLE) {
         require(wallet != address(0), "Escrow: zero address");
         ancfccWallet = wallet;
+    }
+
+    /**
+     * @notice Configure le platform fee (0-100 BPS, soit 0-1%)
+     * @param feeBps Fee en basis points (10 = 0.1%)
+     * @param wallet Adresse de collecte (adresse zero = desactive)
+     */
+    function setPlatformFee(uint256 feeBps, address wallet) external onlyRole(ADMIN_ROLE) {
+        require(feeBps <= 100, "Escrow: fee too high (max 1%)");
+        uint256 oldBps = platformFeeBps;
+        platformFeeBps = feeBps;
+        platformWallet = wallet;
+        emit PlatformFeeUpdated(oldBps, feeBps);
     }
 
     function pause() external onlyRole(ADMIN_ROLE) { _pause(); }

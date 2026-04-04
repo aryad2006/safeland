@@ -3,7 +3,7 @@ const { ethers, upgrades } = require("hardhat");
 
 describe("SafeLandEscrow", function () {
   let nft, escrow;
-  let admin, agent, notary, dgi, ancfcc, seller, buyer;
+  let admin, agent, notary, dgi, ancfcc, seller, buyer, platform;
 
   const AGENT_ROLE = ethers.keccak256(ethers.toUtf8Bytes("AGENT_ROLE"));
   const NOTARY_ROLE = ethers.keccak256(ethers.toUtf8Bytes("NOTARY_ROLE"));
@@ -12,7 +12,7 @@ describe("SafeLandEscrow", function () {
   const SALE_PRICE = ethers.parseEther("10"); // 10 ETH (simule MAD)
 
   beforeEach(async function () {
-    [admin, agent, notary, dgi, ancfcc, seller, buyer] = await ethers.getSigners();
+    [admin, agent, notary, dgi, ancfcc, seller, buyer, platform] = await ethers.getSigners();
 
     // Déployer SafeLandNFT
     const SafeLandNFT = await ethers.getContractFactory("SafeLandNFT");
@@ -48,10 +48,9 @@ describe("SafeLandEscrow", function () {
   });
 
   describe("Flux de vente complet", function () {
-    it("devrait exécuter une vente avec fractionnement fiscal", async function () {
+    it("devrait executer une vente sans platform fee (defaut)", async function () {
       const docHash = ethers.keccak256(ethers.toUtf8Bytes("contrat-vente"));
 
-      // 1. Le notaire crée le deal
       await escrow.connect(notary).createDeal(
         1, seller.address, buyer.address, SALE_PRICE, docHash
       );
@@ -60,21 +59,15 @@ describe("SafeLandEscrow", function () {
       expect(deal.seller).to.equal(seller.address);
       expect(deal.buyer).to.equal(buyer.address);
 
-      // 2. Le vendeur signe
       await escrow.connect(seller).sellerSign(1);
-
-      // 3. L'acheteur dépose les fonds
       await escrow.connect(buyer).buyerDeposit(1, { value: SALE_PRICE });
 
-      // Capturer les soldes avant
       const dgiBefore = await ethers.provider.getBalance(dgi.address);
       const ancfccBefore = await ethers.provider.getBalance(ancfcc.address);
       const sellerBefore = await ethers.provider.getBalance(seller.address);
 
-      // 4. Le notaire complète la transaction
       await escrow.connect(notary).notaryComplete(1);
 
-      // Vérifier le fractionnement fiscal
       const dgiAfter = await ethers.provider.getBalance(dgi.address);
       const ancfccAfter = await ethers.provider.getBalance(ancfcc.address);
       const sellerAfter = await ethers.provider.getBalance(seller.address);
@@ -87,15 +80,107 @@ describe("SafeLandEscrow", function () {
       expect(dgiReceived).to.equal((SALE_PRICE * 400n) / 10000n);
       // 1% ANCFCC
       expect(ancfccReceived).to.equal((SALE_PRICE * 100n) / 10000n);
-      // 95% vendeur
+      // 95% vendeur (platform fee = 0 par defaut)
       expect(sellerReceived).to.equal(SALE_PRICE - dgiReceived - ancfccReceived);
 
-      // Le NFT appartient maintenant à l'acheteur
       expect(await nft.ownerOf(1)).to.equal(buyer.address);
-
-      // Le deal est complété
       const finalDeal = await escrow.getDeal(1);
       expect(finalDeal.status).to.equal(4); // Completed
+    });
+
+    it("devrait executer une vente avec platform fee 0.1%", async function () {
+      // Activer le platform fee
+      await escrow.connect(admin).setPlatformFee(10, platform.address); // 10 BPS = 0.1%
+      expect(await escrow.platformFeeBps()).to.equal(10);
+      expect(await escrow.platformWallet()).to.equal(platform.address);
+
+      const docHash = ethers.keccak256(ethers.toUtf8Bytes("contrat-vente-fee"));
+
+      await escrow.connect(notary).createDeal(
+        1, seller.address, buyer.address, SALE_PRICE, docHash
+      );
+      await escrow.connect(seller).sellerSign(1);
+      await escrow.connect(buyer).buyerDeposit(1, { value: SALE_PRICE });
+
+      const dgiBefore = await ethers.provider.getBalance(dgi.address);
+      const ancfccBefore = await ethers.provider.getBalance(ancfcc.address);
+      const platformBefore = await ethers.provider.getBalance(platform.address);
+      const sellerBefore = await ethers.provider.getBalance(seller.address);
+
+      const tx = await escrow.connect(notary).notaryComplete(1);
+      const receipt = await tx.wait();
+
+      const dgiReceived = (await ethers.provider.getBalance(dgi.address)) - dgiBefore;
+      const ancfccReceived = (await ethers.provider.getBalance(ancfcc.address)) - ancfccBefore;
+      const platformReceived = (await ethers.provider.getBalance(platform.address)) - platformBefore;
+      const sellerReceived = (await ethers.provider.getBalance(seller.address)) - sellerBefore;
+
+      const expectedDgi = (SALE_PRICE * 400n) / 10000n;
+      const expectedAncfcc = (SALE_PRICE * 100n) / 10000n;
+      const expectedPlatform = (SALE_PRICE * 10n) / 10000n; // 0.1%
+      const expectedSeller = SALE_PRICE - expectedDgi - expectedAncfcc - expectedPlatform;
+
+      expect(dgiReceived).to.equal(expectedDgi);
+      expect(ancfccReceived).to.equal(expectedAncfcc);
+      expect(platformReceived).to.equal(expectedPlatform);
+      expect(sellerReceived).to.equal(expectedSeller);
+
+      // Verifier que PlatformFeeCollected est emis
+      const events = receipt.logs.filter(l => {
+        try { return escrow.interface.parseLog(l)?.name === "PlatformFeeCollected"; } catch { return false; }
+      });
+      expect(events.length).to.equal(1);
+    });
+  });
+
+  describe("Platform fee configuration", function () {
+    it("devrait permettre a l admin de configurer le platform fee", async function () {
+      await escrow.connect(admin).setPlatformFee(10, platform.address);
+      expect(await escrow.platformFeeBps()).to.equal(10);
+      expect(await escrow.platformWallet()).to.equal(platform.address);
+    });
+
+    it("devrait emettre PlatformFeeUpdated", async function () {
+      await expect(escrow.connect(admin).setPlatformFee(15, platform.address))
+        .to.emit(escrow, "PlatformFeeUpdated")
+        .withArgs(0, 15);
+    });
+
+    it("devrait refuser un fee > 1% (100 BPS)", async function () {
+      await expect(
+        escrow.connect(admin).setPlatformFee(101, platform.address)
+      ).to.be.revertedWith("Escrow: fee too high (max 1%)");
+    });
+
+    it("devrait refuser setPlatformFee par un non-admin", async function () {
+      await expect(
+        escrow.connect(buyer).setPlatformFee(10, platform.address)
+      ).to.be.reverted;
+    });
+
+    it("devrait permettre fee = 0 (desactive)", async function () {
+      await escrow.connect(admin).setPlatformFee(10, platform.address);
+      await escrow.connect(admin).setPlatformFee(0, ethers.ZeroAddress);
+      expect(await escrow.platformFeeBps()).to.equal(0);
+    });
+
+    it("devrait donner le fee au vendeur si platformWallet est zero", async function () {
+      // Fee configure mais wallet = zero → vendeur recoit tout
+      await escrow.connect(admin).setPlatformFee(10, ethers.ZeroAddress);
+
+      const docHash = ethers.keccak256(ethers.toUtf8Bytes("contrat-no-wallet"));
+      await escrow.connect(notary).createDeal(1, seller.address, buyer.address, SALE_PRICE, docHash);
+      await escrow.connect(seller).sellerSign(1);
+      await escrow.connect(buyer).buyerDeposit(1, { value: SALE_PRICE });
+
+      const sellerBefore = await ethers.provider.getBalance(seller.address);
+      await escrow.connect(notary).notaryComplete(1);
+      const sellerAfter = await ethers.provider.getBalance(seller.address);
+
+      const dgiAmount = (SALE_PRICE * 400n) / 10000n;
+      const ancfccAmount = (SALE_PRICE * 100n) / 10000n;
+      // Vendeur recoit 95% (pas de platform fee effectif)
+      expect(sellerAfter - sellerBefore).to.equal(SALE_PRICE - dgiAmount - ancfccAmount);
     });
   });
 
@@ -328,7 +413,7 @@ describe("SafeLandEscrow", function () {
       await escrow.connect(buyer).buyerDeposit(1, { value: SALE_PRICE });
 
       // Créer un 2e notaire
-      const [,,,,,,, notary2] = await ethers.getSigners();
+      const [,,,,,,,, notary2] = await ethers.getSigners();
       await escrow.connect(admin).grantRole(NOTARY_ROLE, notary2.address);
       await expect(
         escrow.connect(notary2).notaryComplete(1)

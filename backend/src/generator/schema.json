@@ -1,0 +1,178 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SafeLand Country Configuration Schema",
+  "description": "Configuration schema for generating SafeLand forks to new countries",
+  "type": "object",
+  "required": [
+    "name",
+    "blockchain",
+    "blockchainId",
+    "rpc_url",
+    "currency",
+    "language",
+    "inheritance_school",
+    "fiscal_rules",
+    "regions",
+    "modules"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Country name (lowercase, no spaces, unique)",
+      "pattern": "^[a-z]+$",
+      "minLength": 3,
+      "maxLength": 30,
+      "examples": ["senegal", "egypt", "kenya"]
+    },
+    "blockchain": {
+      "type": "string",
+      "description": "Target blockchain network",
+      "enum": ["polygon", "ethereum", "arbitrum", "optimism", "base"],
+      "examples": ["polygon"]
+    },
+    "blockchainId": {
+      "type": "integer",
+      "description": "EVM chain ID",
+      "enum": [1, 137, 42161, 10, 8453],
+      "examples": [137]
+    },
+    "rpc_url": {
+      "type": "string",
+      "description": "JSON-RPC endpoint for blockchain",
+      "format": "uri",
+      "examples": ["https://polygon-rpc.com", "https://eth.llamarpc.com"]
+    },
+    "currency": {
+      "type": "string",
+      "description": "Local currency code (ISO 4217)",
+      "pattern": "^[A-Z]{3}$",
+      "examples": ["CFA", "EGP", "KES", "XOF"]
+    },
+    "language": {
+      "type": "string",
+      "description": "Primary language",
+      "enum": ["fr", "en", "ar"],
+      "examples": ["fr"]
+    },
+    "inheritance_school": {
+      "type": "string",
+      "description": "Islamic school of inheritance (Madhab)",
+      "enum": ["hanafi", "maliki", "shafii", "hanbali", "custom"],
+      "examples": ["hanafi"]
+    },
+    "fiscal_rules": {
+      "type": "object",
+      "description": "Tax and fee configuration",
+      "required": ["dgi_percent", "ancfcc_percent", "platform_fee_bps"],
+      "additionalProperties": false,
+      "properties": {
+        "dgi_percent": {
+          "type": "number",
+          "description": "Government tax percentage (0-10%)",
+          "minimum": 0,
+          "maximum": 10,
+          "multipleOf": 0.1,
+          "examples": [4, 5]
+        },
+        "ancfcc_percent": {
+          "type": "number",
+          "description": "Land registry fee percentage (0-5%)",
+          "minimum": 0,
+          "maximum": 5,
+          "multipleOf": 0.1,
+          "examples": [1, 0.5]
+        },
+        "platform_fee_bps": {
+          "type": "integer",
+          "description": "SafeLand platform fee in basis points (1-100 = 0.01%-1%)",
+          "minimum": 1,
+          "maximum": 100,
+          "examples": [10, 25, 50]
+        }
+      }
+    },
+    "regions": {
+      "type": "array",
+      "description": "List of supported regions/provinces",
+      "minItems": 1,
+      "maxItems": 100,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z]+(?:[-][a-z]+)?$",
+        "minLength": 2,
+        "maxLength": 50,
+        "examples": ["dakar", "kaolack", "saint-louis"]
+      },
+      "examples": [
+        ["dakar", "kaolack", "tambacounda"],
+        ["cairo", "alexandria", "giza"]
+      ]
+    },
+    "modules": {
+      "type": "object",
+      "description": "Feature modules enabled for this country",
+      "required": ["escrow", "succession", "marketplace", "justice", "timelock"],
+      "additionalProperties": false,
+      "properties": {
+        "escrow": {
+          "type": "boolean",
+          "description": "Enable property sale escrow",
+          "examples": [true]
+        },
+        "succession": {
+          "type": "boolean",
+          "description": "Enable succession/inheritance management",
+          "examples": [true]
+        },
+        "marketplace": {
+          "type": "boolean",
+          "description": "Enable marketplace listings",
+          "examples": [true, false]
+        },
+        "justice": {
+          "type": "boolean",
+          "description": "Enable judicial action requests",
+          "examples": [true, false]
+        },
+        "timelock": {
+          "type": "boolean",
+          "description": "Enable timelock governance",
+          "examples": [true]
+        }
+      }
+    },
+    "contacts": {
+      "type": "object",
+      "description": "Country-specific contact information",
+      "additionalProperties": false,
+      "properties": {
+        "land_registry": {
+          "type": "string",
+          "description": "Land registry authority name",
+          "minLength": 5,
+          "maxLength": 200,
+          "examples": ["ANCFCC Dakar", "Egyptian Ministry of Housing"]
+        },
+        "support_email": {
+          "type": "string",
+          "description": "Customer support email",
+          "format": "email",
+          "examples": ["support@safeland-senegal.com"]
+        },
+        "support_phone": {
+          "type": "string",
+          "description": "Customer support phone",
+          "pattern": "^\\+[0-9\\s()\\-]{10,20}$",
+          "examples": ["+221 33 123 45 67", "+20 100 123 4567"]
+        },
+        "escalation_email": {
+          "type": "string",
+          "description": "Emergency/critical issue email",
+          "format": "email",
+          "examples": ["escalation@safeland-senegal.com"]
+        }
+      }
+    }
+  }
+}

@@ -5,15 +5,15 @@
 
 | Couche | Etat |
 |---|---|
-| Smart contracts | 6 contrats UUPS + __gap[50] — 206 tests OK |
-| Backend Express | 8 routes + WS notifications — 167 tests (7 suites) OK |
+| Smart contracts | 6 contrats UUPS + __gap[50] + platform fee — 213 tests OK |
+| Backend Express | 8 routes + WS notifications — 227 tests (11 suites) OK |
 | Subgraph TheGraph | OK codegen + build |
 | Frontend Next.js | 9 pages + NotificationBell + useNotifications |
 | CI/CD GitHub Actions | 7 jobs (npm audit strict, plus de || true) |
 | Docker Compose | SQLite volume + secrets interpoles via ${VAR} |
 | Documentation | CDC V3, Livre Blanc V2, Marketing, Guide Utilisateurs, Audit, B2G (10 docs) |
 
-**Total tests : 373 (206 SC + 167 backend)**
+**Total tests : 440 (213 SC + 227 backend)**
 
 ## Contrats deployes
 
@@ -38,8 +38,8 @@ npm run dev:frontend         # terminal 4
 | `npm run update-env` | Affiche NEXT_PUBLIC_* prets a copier |
 | `npm run update-env:write` | Ecrit frontend/.env.local |
 | `npm run sync-abis` | Sync tous les ABIs Hardhat -> subgraph + frontend |
-| `npm test` | Tests smart contracts (206 tests) |
-| `cd backend && npm test` | Tests backend (167 tests, 7 suites) |
+| `npm test` | Tests smart contracts (213 tests) |
+| `cd backend && npm test` | Tests backend (227 tests, 11 suites) |
 
 ## Architecture notifications WebSocket
 
@@ -89,7 +89,35 @@ Env var backend : `TIMELOCK_ADDRESS` (+ NFT/ESCROW/FRIDDA/JUSTICE/REGISTRY_ADDRE
 | 10 | f837b58 | ESLint backend (0 warn), WS auto-refresh properties+escrow, MetaMask chainChanged reload |
 | 11 | 8df3f7d | Audit technique complet (78 findings), CDC V3, Livre Blanc V2, Marketing, Guide Utilisateurs, Dossier B2G (10 docs) |
 | 12 | 4192ccd | Fix 11 issues critiques/majeurs (contrats + backend + frontend + infra), 373 tests verts |
-| 13 | (HEAD) | Fork SafeLand Syrie + Guide strategique multi-pays + Appchain L2 |
+| 13 | dc5fc65 | Fork SafeLand Syrie + Guide strategique multi-pays + Appchain L2 |
+| 14 | (HEAD) | Platform fee Escrow + 4 suites tests backend (440 tests total) |
+
+## Session 14 — Platform fee + Tests backend
+
+### Platform fee (SafeLandEscrow.sol)
+- `platformFeeBps` : configurable 0-100 BPS (0-1%), defaut 0
+- `platformWallet` : adresse de collecte (ta societe)
+- `setPlatformFee(feeBps, wallet)` : setter admin, capped a 1%
+- Si `platformWallet == address(0)` : fee retourne au vendeur (graceful degradation)
+- Events : `PlatformFeeCollected(dealId, amount, wallet)`, `PlatformFeeUpdated(oldBps, newBps)`
+- ABI Escrow passe de 59 a 64 entrees (synce frontend + subgraph)
+- 8 nouveaux tests SC couvrant tous les cas (fee actif, fee zero, wallet zero, max 1%, non-admin)
+
+### Tests backend (4 nouvelles suites, +60 tests)
+
+| Suite | Tests | Endpoints couverts |
+|-------|-------|--------------------|
+| properties.test.js | 18 | POST /, GET /:id, GET /?city/owner, POST lock/unlock, POST/DELETE encumbrance |
+| escrow.test.js | 14 | POST /, GET /:id, POST seller-sign/buyer-deposit/notary-complete/cancel, GET fees |
+| justice.test.js | 14 | POST actions, GET actions/:id, POST sign/execute, POST/GET recovery, GET stats |
+| fridda.test.js | 12 | POST /, GET /:id, POST distribute/finalize/propose, POST vote, GET proposal |
+
+Pattern : mocking blockchain via `jest.mock("../src/config/blockchain")`, DB isolee par suite, auth via `loginAs(wallet, role)`.
+
+### Totaux apres session 14
+- Smart contracts : 213 tests (6 suites) — `npm test`
+- Backend : 227 tests (11 suites) — `cd backend && npm test`
+- **Total : 440 tests**
 
 ## Session 13 — Fork Syrie + Strategie multi-pays
 
@@ -176,7 +204,7 @@ Document strategique complet pour deployer SafeLand dans N pays : `docs/GUIDE-ST
 
 | Projet | Emplacement | Etat |
 |--------|-------------|------|
-| SafeLand Maroc (original) | `c:\Users\USER\Documents\safeland` | 92% — 373 tests, pret pour Sepolia |
+| SafeLand Maroc (original) | `c:\Users\USER\Documents\safeland` | 95% — 440 tests, pret pour Sepolia |
 | SafeLand Syrie (fork) | `c:\Users\USER\Documents\safeland-syrie` | ~40% — contrats adaptes, backend/frontend a adapter |
 | Template multi-pays | A construire | 0% — voir Guide Strategique |
 
@@ -184,8 +212,9 @@ Document strategique complet pour deployer SafeLand dans N pays : `docs/GUIDE-ST
 
 ### Court terme (faisable sans dependances)
 
-- [ ] Sync ABIs apres modif contrats : `npm run compile && npm run sync-abis`
-- [ ] Tests backend manquants : ecrire tests pour routes escrow, fridda, justice, properties (couverture actuelle ~40%)
+- [x] Sync ABIs apres modif contrats : `npm run compile && npm run sync-abis` (session 14)
+- [x] Tests backend : properties (18), escrow (14), justice (14), fridda (12) — couverture ~80% (session 14)
+- [x] Platform fee dans SafeLandEscrow : 0.1% configurable, capped 1% (session 14)
 - [ ] WS auto-refresh pages bank, justice, fridda (meme pattern que properties/escrow/timelock)
   - bank : channels `bank.*`
   - justice : channels `justice.action`, `justice.executed`

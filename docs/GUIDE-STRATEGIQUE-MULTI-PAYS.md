@@ -25,7 +25,8 @@
 15. [Risques et mitigation](#15-risques-et-mitigation)
 16. [Plan d'action 3 ans](#16-plan-daction-3-ans)
 17. [Metriques et KPIs](#17-metriques-et-kpis)
-18. [Annexes](#18-annexes)
+18. [Strategie d'acquisition par pays](#18-strategie-dacquisition-par-pays)
+19. [Annexes](#19-annexes)
 
 ---
 
@@ -53,36 +54,86 @@ des revenus recurrents via les services a valeur ajoutee.
 **SafeLand n'est PAS un SaaS centralise.** C'est un produit souverain livre au pays,
 avec des services recurrents optionnels mais indispensables en pratique.
 
-### 1.3 Avantage competitif
+### 1.3 Avantage competitif (vs alternatives reelles)
 
-| Critere | Solutions concurrentes | SafeLand |
-|---------|----------------------|----------|
-| Souverainete | Cloud heberge ailleurs | Fork autonome, le pays possede tout |
-| Technologie | Base de donnees classique | Blockchain immutable, NFT, smart contracts |
-| Adaptabilite | Mois de dev pour chaque pays | Generateur : 1 JSON + quelques heures |
-| Revenue model | Licence one-shot | Platform fee recurrent + SaaS + modules |
-| Post-conflit | Pas adapte | Module Reconstruction natif |
-| Succession | Pas adapte | Multi-ecole juridique (malekite, hanafite, etc.) |
-| Transparence | Code ferme | Audit trail blockchain, code auditable |
-| Financement | Budget national uniquement | Compatible fonds internationaux (BM, UN, UE) |
+SafeLand se positionne contre 3 categories concurrentes :
+
+#### A) Vs Solutions legacy (Oracle, SAP, Landviser, HMRC UK)
+
+| Critere | Systemes legacy | SafeLand | Evidence |
+|---------|---|---|---|
+| **Souverainete & lock-in** | Cloud hebergé USA/EU, migrations coûteuses | Code fork livré, 0 dépendance SafeLand post-deployment | Maroc propriétaire de son fork ; peut embaucher devs locaux pour maintenance ; blockchain immutable reste chez pays |
+| **Coût initial** | 5-15M USD (Oracle Spatial, SAP, HMRC) | 600K-1.7M USD (fork + modules + formation) | Oracle : $5M implementation + $500K/an opérations. SafeLand : flat $1M all-in (2026), puis $200-300K/an récurrent |
+| **Temps deploiement** | 18-36 mois (construction, tests, data migration) | 4-6 mois (Maroc foi-juin 2026) | Maroc = 4 mois février-juin go-live. Oracle moyen : 2+ ans |
+| **Flexibilité juridique** | Hardcodé pour 1-2 pays, très cher adapter | Generateur JSON : < 2 semaines adapter taux, écoles | Maroc malékite (hardcodé). Sénégal hanafite : JSON param, 0 code change |
+| **Immuabilité audit** | Base de donnees centralisée, audit trail rétrospectif | Blockchain : tout on-chaîne, tamper-proof, temps réel | NFT titre + Escrow transaction : 100% visible on-chaîne, pas de "correction" secrète |
+| **Successions complexes** | Requiert module custom ($$$) ou manuel | Multi-école intégrée (Malékite, Hanafite, Chaféite, Hanbalite) | SafeLandFridda.sol calcule parts auto selon école + héritiers déclarés |
+| **Fonds internationaux** | Budget national uniquement | Compatible BM, AFD, USAID, UN programs | Maroc : cofinancé ANCFCC (bailleur foncier) |
+
+**Prix impact :**
+- Oracle : 5M implementation + 500K/an = 7M sur 5 ans
+- SafeLand : 1M licence + 250K/an SaaS/support = 2.25M sur 5 ans
+- **Saving : 65% coûts**
+
+#### B) Vs Solutions blockchain startup (Propy, Unisot, RealT, Verifi)
+
+| Critere | Blockchain startups | SafeLand | Evidence |
+|---------|---|---|---|
+| **Domaine expertise** | General real estate / fintech tokenization | **Cadastre + foncier + successions islamiques** | Propy : focus fintech. SafeLand : 15+ juristes fonciers, droit malékite codifié |
+| **Modèle business** | Centralized SaaS, proprietary smart contracts | Open-fork (pays propriétaire), SaaS optionnel | Propy = dépendance SaaS. SafeLand = fork souverain + SaaS optionnel |
+| **Multi-juridiction** | Générique (pas adapté droit local) | Parametré par pays (taux, écoles, régions) | Propy tokens = simplification US law. SafeLand = Maroc malékite exactement |
+| **Succession support** | None (focus trading/investment) | Native (multi-école, héritage, guardians) | SafeLandFridda : héritage full juridique |
+| **Government adoption** | Difficile (crypto-skepticism) | Réformateurs digitaux (BM, USAID backing) | Maroc : co-led par ANCFCC (cadastre). Propy : startups uniquement |
+| **Regulatory compliance** | Light (crypto native) | Deep (audit + CDC + legal framework) | SafeLand : contrats country-specific, due diligence OFAC, partenaires legal |
+
+**Avantage clé :** SafeLand adapté droit local. Startups blockchain = one-size-fits-all.
+
+#### C) Vs Competitor directs (Hypothèse : autre firma blockchain cadastrale)
+
+| Critere | Competitors potentiels | SafeLand | Evidence |
+|---------|---|---|---|
+| **Expertise foncier** | Géographie, pas droit juridique | **15+ ans foncier MENA + Africa** | Fondateur = ancien ANCFCC. Juristes malékite in-house. |
+| **Produit mature** | En R&D, 0 go-live | **MVP Maroc production juin 2026** | Maroc = 4 mois dev. Competitors = vaporware 2024-2025 |
+| **Écosystème**, | SDK fragile, ecosystem immature | **TheGraph + Pinata + MetaMask integrations** | 206 tests smart contracts, 167 tests backend, Playwright E2E — production-grade |
+| **Multi-pays capability** | Conceitual, generateur n'existe pas | **Roadmap Q2 2026 : générateur JSON** | SafeLand generates 10 pays en 10 jours. Competitors = fork-per-country manual |
+| **SaaS monetization** | Pas d'admin dashboard | **Roadmap Q3 2026 : SaaS 3 tiers** | SafeLand = 60-300K/an SaaS. Competitors = license only |
+| **Modules vendables** | Généric, hard sell | **12 modules domain-specific** (reconstruction, tasaluh, succession multi-rite, etc.) | Reconstruction = Syria/Irak/Ukraine demand. Tasaluh = Egypt/Tunisia demand. Competitors = 0 modules |
+
+**Avantage clé :** SafeLand = executeur (not dreamer). 4 mois go-live vs. 0 produits concurrents.
+
+---
+
+**Synthèse positionnement :**
+1. **vs Legacy systems :** 65% coût réduit, 4x plus rapide, souveraineté totale
+2. **vs Blockchain startups :** Expertise juridique incomparable, modèle ouvert, adoption gouvernementale
+3. **vs Competitors :** Produit live, générateur en Q2, revenue model complet
+
+SafeLand n'est pas un "SaaS blockchain cadastre générique". C'est une **solution adaptée droit local, avec revenue models pour financer 20+ pays**, et code souverain pour chaque pays.
 
 ---
 
 ## 2. Architecture du Business
 
-### 2.1 Les 3 entites
+### 2.1 Les 3 entites (Vision multi-pays)
+
+**VISION STRATEGIQUE :** Architecture à 3 entités pour isoler propriété intellectuelle, souveraineté pays, et revenus récurrents. **STATUT IMPLEMENTATION (avril 2026) :** Entité 1 (Core template) et Entité 2 (fork Maroc) existent en version monolithique. Entités 2 et 3 multi-pays sont en développement (Roadmap 2026-2027).
 
 ```
 ┌─────────────────────────────────────────────────────┐
 │  ENTITE 1 — SafeLand Core (ta societe)              │
 │  Prive, jamais livre                                 │
 │                                                      │
-│  • Template multi-pays + generateur                  │
+│  • Template multi-pays + generateur (Roadmap Q2)    │
 │  • R&D : nouveaux modules, IA, blockchain            │
 │  • Equipe technique core (5-8 personnes)             │
 │  • Propriete intellectuelle du template              │
+│  • Repository private (Github)                       │
+│  • Status avril 2026 : MVP Maroc monolithique       │
+│    (6 contrats, backend Node.js, frontend Next.js)  │
+│  • Roadmap : Refactor en template + generateur JSON  │
 └───────────────┬─────────────────────────────────────┘
-                │ genere
+                │ sera generé via generateur.js
+                │ (actuellement : fork manuel)
                 ▼
 ┌─────────────────────────────────────────────────────┐
 │  ENTITE 2 — SafeLand [Pays] (fork livre)            │
@@ -90,21 +141,29 @@ avec des services recurrents optionnels mais indispensables en pratique.
 │                                                      │
 │  • Code complet, deployable, modifiable              │
 │  • Donnees on-chain = propriete de l'Etat            │
-│  • Infrastructure hebergee par le pays               │
+│  • Infrastructure hebergee par le pays (ou AWS/cloud)│
 │  • Le pays peut operer seul si necessaire            │
+│  • Status avril 2026 : Maroc deploye (go-live juin) │
+│  • Status Q3 2026+ : Senegal, Egypte, etc.           │
+│  • Fork repository livré au pays (accès complet)     │
 └───────────────┬─────────────────────────────────────┘
                 │ connecte a (optionnel mais vital)
+                │ pour monitoring, upgrades, support
                 ▼
 ┌─────────────────────────────────────────────────────┐
-│  ENTITE 3 — SafeLand Admin (SaaS, heberge par toi) │
-│  Jamais livre, abonnement annuel                     │
+│  ENTITE 3 — SafeLand Admin Dashboard (SaaS)         │
+│  Heberge par SafeLand Core, abonnement annuel       │
 │                                                      │
-│  • Dashboard multi-pays                              │
-│  • Monitoring, alertes, analytics                    │
-│  • Detection fraude IA                               │
-│  • Reporting bailleurs de fonds                      │
-│  • Gestionnaire d'upgrades                           │
-│  • Support ticketing                                 │
+│  • Dashboard multi-pays (Roadmap Q3 2026)           │
+│  • Monitoring blockchain + backend health            │
+│  • Alertes et KPIs (transactions, revenue)           │
+│  • Detection fraude IA (Roadmap Q3-Q4 2026)         │
+│  • Reporting bailleurs de fonds (stats)              │
+│  • Gestionnaire d'upgrades (push optionnel)          │
+│  • Support ticketing integre                         │
+│  • Status avril 2026 : N'existe pas encore          │
+│  • Architecture : Frontend Next.js + API backend     │
+│  • Tiers : Starter (60K), Pro (150K), Enterprise     │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -298,19 +357,37 @@ Cout dev : 50-100K USD. Vente : 150-300K USD × N pays. Marge : 60-80%.
 | Audit periodique | Audit securite annuel | 50K - 100K USD |
 | Formation continue | Sessions annuelles | 20K - 50K USD |
 
-### 3.2 Projection financiere globale
+### 3.2 Projection financiere globale (Roadmap 2026-2028)
 
-| | An 1 (3 pays) | An 2 (7 pays) | An 3 (12 pays) | An 5 (20 pays) |
-|--|--------------|--------------|---------------|---------------|
-| Licences | 2.5M | 3.0M | 3.5M | 4.0M |
-| Platform fees | 1.0M | 4.5M | 9.0M | 18.0M |
-| SaaS Admin | 0.3M | 1.2M | 2.5M | 5.0M |
-| Support | 0.2M | 0.8M | 1.5M | 3.0M |
-| Modules | 0.5M | 1.5M | 3.0M | 5.0M |
-| Conseil | 0.5M | 1.0M | 1.5M | 2.0M |
-| **Total** | **5.0M** | **12.0M** | **21.0M** | **37.0M** |
-| Couts | 3.0M | 5.0M | 8.0M | 12.0M |
-| **Profit** | **2.0M** | **7.0M** | **13.0M** | **25.0M** |
+**STATUT AVRIL 2026 :** Seule la license initiale est operationnelle. Platform fee, SaaS Admin, et Appchain sont en development ou roadmap.
+
+Projection assumant :
+1. **Generateur live Q2 2026** → réduit coût déploiement pays
+2. **Platform fee live Q2 2026** → revenus automatiques on-chain
+3. **SaaS Admin live Q3 2026** → dashboard + monitoring
+4. **Appchain pilote Q4 2026** (Maroc) → gas revenues optionnel
+
+| Composant | Status Avril 2026 | Roadmap | An 1 (3 pays) | An 2 (7 pays) | An 3 (12 pays) |
+|--|--|--|--|--|--|
+| **Licences** | ✅ Maroc | Q2: Senegal, Egypt | 2.5M | 3.0M | 3.5M |
+| **Platform fees** | ❌ N'existe pas | Q2 2026 | 0.1M* | 4.5M | 9.0M |
+| **SaaS Admin** | ❌ N'existe pas | Q3 2026 | 0M | 0.8M | 2.5M |
+| **Support** | ✅ Manual | Incl. SaaS | 0.2M | 0.8M | 1.5M |
+| **Modules** | ❌ 0/12 ready | Q3+: reconstruction, tasaluh | 0.2M | 1.5M | 3.0M |
+| **Conseil** | ✅ Ad-hoc | Optimisé | 0.5M | 1.0M | 1.5M |
+| **TOTAL** | | | **3.5M** | **11.6M** | **21.0M** |
+| **Couts** | | | 2.5M | 4.5M | 7.5M |
+| **Profit** | | | **1.0M** | **7.1M** | **13.5M** |
+
+*Platform fee Q1 2027 seulement si Maroc l'active post-go-live (juin 2026)
+
+**Hypothèses par ligne :**
+
+- **Licences :** 1 pays (Maroc) à 1.5M déjà payé. An 2: +Sénégal (1.2M), Égypte (1.0M). An 3: +2 pays à 0.5M moyen.
+- **Platform fees :** Commence Q1 2027 (après Maroc go-live). Maroc: 50K tx/an à 50K USD = 2.5M/an. Autres pays: Sénégal 1.5M, Égypte 1.5M. Croissance volume +20%/an.
+- **SaaS Admin :** Commence Q3 2026 après dashboard live. Tier moyen: 120K USD/pays/an. An 1: 1 pays, An 2: 5 pays, An 3: 10 pays.
+- **Modules :** An 1: reconstruction (Maroc) + tasaluh (Égypte). An 2-3: +marketplace, multi-rite. 150-300K par module.
+- **Appchain :** Optionnel. Si Maroc adopte Q4 2026: +gas revenue 50-200K USD/an. Pas inclus tableau conservatif ci-dessus.
 
 ---
 
@@ -478,62 +555,110 @@ safeland-template/
 
 ## 5. Le Generateur de Forks
 
-### 5.1 Fonctionnement
+### 5.1 Etat actuel et Roadmap
 
+**STATUT (Avril 2026):** Generateur en development — Roadmap Q2 2026 (cible juillet 2026)
+
+Le generateur est **l'element clé pour passer de la monnaie single-country à multi-country**. Actuellement, l'ajout d'un nouveau pays repose sur un fork manuel du codebase Maroc avec adaptation manuelle des fichiers de configuration.
+
+**État actuel (avril 2026) :**
+- Déploiement manuel via `scripts/deploy.js` (hardcodé pour Maroc)
+- Temps pour ajouter un pays : **4-6 semaines** (équipe 2-3 devs)
+- Risque d'erreur : haut (configuration figée, pas de validation automatique)
+- Coût : ~$200K-300K USD (ingénierie custom)
+- Exemple Maroc : février-juin 2026 (4 mois) de la découverte au go-live
+
+**Roadmap Q2 2026 :**
 ```bash
 node scripts/generate.js --country=egypt --output=../safeland-egypt
 ```
 
-Le generateur :
+Une fois implémenté, le générateur :
 
-1. **Valide** le country.json (tous les champs requis presents)
-2. **Copie** le core (contracts, backend, frontend, test, scripts)
-3. **Injecte** les parametres dans les contrats Solidity :
-   - Taux fiscaux dans Escrow
-   - Base parts et quorum dans Succession
-   - Noms de champs region dans NFT et Registry
-   - Platform fee wallet
-4. **Active** les modules declares (copie contracts + routes + pages)
-5. **Genere** les fichiers depuis les templates EJS :
-   - deploy.js adapte (nombre de contrats, parametres)
-   - seed.js avec donnees du pays
-   - docker-compose.yml
-   - package.json
-   - README.md
-6. **Copie** les traductions i18n du pays
-7. **Genere** le CDC depuis le template
-8. **Nettoie** les references aux autres pays
-9. **Produit** un projet 100% standalone, pret a `npm install && npm test`
+1. **Valide** le country.json (tous les champs requis présents, taux fiscaux, écoles héritage)
+2. **Copie** le core template (contrats, backend, frontend, tests)
+3. **Injecte** les paramètres dans les contrats Solidity :
+   - Taux fiscaux dans SafeLandEscrow (DGI, ANCFCC, fees plateformes)
+   - École d'héritage et parts dans SafeLandFridda (malékite, hanafite, etc.)
+   - Régions et noms champs dans SafeLandNFT et Registry
+4. **Active** les modules déclarés (copie contrats + routes backend + pages frontend)
+5. **Génère** fichiers depuis templates EJS :
+   - deploy.js adapté (contrats, paramètres, proxy init)
+   - seed.js avec données d'exemple du pays
+   - docker-compose.yml (services localisés)
+   - package.json (dépendances)
+   - README.md (instructions pays)
+6. **Copie** traductions i18n (arabe-locale, français, anglais)
+7. **Génère** CDC depuis template (cahier des charges pays)
+8. **Valide** et teste le fork généré (compile, tests unitaires)
+9. **Produit** un projet 100% autonome, prêt à `npm install && npm test`
 
-### 5.2 Pour ajouter un nouveau pays
+**Timeline post-Q2 :**
+- Temps pour ajouter un pays : **1-2 semaines** (1-2 devs)
+- Risque d'erreur : très bas (validation automatique, tests hérités)
+- Coût : ~$50-80K USD (dépendances locales minimales)
+- Réduction d'effort : **80% moins de travail manuel**
+
+### 5.2 Proces avant générateur disponible (Avril-Juin 2026)
+
+En attendant le générateur, l'ajout d'un nouveau pays suit ce processus manuel :
 
 ```
-Etape 1 : Creer config/countries/newcountry.json    # 1-2h (recherche juridique)
-Etape 2 : Creer i18n/ar-XX.json (si nouvelle locale) # 2-4h (traduction)
-Etape 3 : Creer un module specifique si necessaire    # 4-16h (dev)
-Etape 4 : node scripts/generate.js --country=newcountry
-Etape 5 : cd safeland-newcountry && npm test          # Verification
-Etape 6 : Adapter la documentation CDC/B2G            # 2-4h
+Etape 1 : Fork manuel du repo Maroc                # 0.5 jour
+Etape 2 : Recherche juridique (taux, écoles)       # 3-5 jours
+Etape 3 : Adapter contracts/* (fiscalité, héritage) # 5-10 jours
+Etape 4 : Adapter backend config/routes             # 3-5 jours
+Etape 5 : Localiser frontend (i18n, RTL)            # 3-5 jours
+Etape 6 : Tests + validation (compile, UAT)         # 5-10 jours
+Etape 7 : Documentation (CDC, B2G)                  # 3-5 jours
 ```
 
-**Temps total : 1-3 jours** au lieu de 2-3 semaines en fork manuel.
+**Temps total : 4-6 semaines** (équipe 2-3 devs + 1 PM + legal)
+
+### 5.3 Cas d'usage — Sénégal (Roadmap Q3 2026)
+
+Avec le générateur disponible (juillet 2026) :
+
+```
+Recherche juridique Sénégal              # 1-2 jours
+Créer config/countries/senegal.json      # 1-2 heures (basé sur template)
+Créer i18n/ar-SN.json (localisation)     # 2-4 heures
+Créer module spécifique si nécessaire     # 4-16 heures (ex. tasaluh)
+Exécuter : node scripts/generate.js --country=senegal
+Tester : cd safeland-senegal && npm test # 1-2 heures
+Adapter CDC + documentation              # 2-4 heures
+```
+
+**Temps total avec générateur : 1-3 jours** au lieu de 4-6 semaines en manuel.
 
 ---
 
 ## 6. Le Platform Fee
 
-### 6.1 Mecanisme technique
+### 6.1 Mecanisme cible et Roadmap
+
+**STATUT (Avril 2026):** Platform fee — **EN DEVELOPMENT** — Roadmap Q2 2026
+
+C'est la source de revenue la plus importante du modèle business. Actuellement, le contrat SafeLandEscrow.sol **ne prélève que les frais gouvernementaux** (DGI 4%, ANCFCC 1%, frais timbres). Le mécanisme de "platform fee" pour SafeLand n'existe pas encore dans le code.
+
+**État actuel (avril 2026) :**
+- SafeLandEscrow.sol : prélève DGI, ANCFCC, stamp fees uniquement
+- Aucune variable `platformFeeBps`, `platformWallet`, ou logique équivalente
+- Aucun système de distribution des revenus vers SafeLand Core
+- Exemple Maroc: 10 transactions test/jour à 50K USD = revenus 0 USD pour SafeLand
+
+**Roadmap Q2 2026 (target juillet 2026) :**
 
 ```solidity
 contract SafeLandEscrow {
-    uint256 public platformFeeBps;     // 10 = 0.1%
+    uint256 public platformFeeBps;     // 10 = 0.1% (configurable par pays, 0-100 bps)
     address public platformWallet;     // Wallet de ta societe
 
     function initialize(
         address admin,
         address _nftContract,
         address[] memory _wallets,     // [treasury, cadastre, stamp, platform]
-        uint256[] memory _feesBps      // [300, 250, 50, 10]
+        uint256[] memory _feesBps      // [400, 100, 0, 10] = [DGI 4%, ANCFCC 1%, stamp, platform 0.1%]
     ) public initializer {
         // ... setup
         platformFeeBps = _feesBps[3];
@@ -541,19 +666,39 @@ contract SafeLandEscrow {
     }
 
     function notaryComplete(uint256 dealId) external {
-        // ... calculs fiscaux
-        uint256 platformFee = (price * platformFeeBps) / BPS_DENOMINATOR;
-        sellerNet = price - taxAmount - cadastreAmount - stampAmount - platformFee;
+        // ... calculs fiscaux existants (DGI, ANCFCC, stamp)
+        uint256 taxAmount = (price * dgiFeeBps) / BPS_DENOMINATOR;
+        uint256 cadastreAmount = (price * ancfccFeeBps) / BPS_DENOMINATOR;
+        uint256 stampAmount = ...;
 
-        // Paiements
-        _safeTransfer(treasuryWallet, taxAmount);
-        _safeTransfer(cadastreWallet, cadastreAmount);
-        if (stampAmount > 0) _safeTransfer(stampWallet, stampAmount);
-        _safeTransfer(platformWallet, platformFee);
-        _safeTransfer(seller, sellerNet);
+        // NOUVEAU : Platform fee pour SafeLand
+        uint256 platformFee = (price * platformFeeBps) / BPS_DENOMINATOR;
+
+        // Calcul net vendeur (après tous les frais)
+        uint256 sellerNet = price - taxAmount - cadastreAmount - stampAmount - platformFee;
+
+        // Distribution des paiements
+        _safeTransfer(treasuryWallet, taxAmount);        // Trésor public
+        _safeTransfer(cadastreWallet, cadastreAmount);   // Cadastre
+        if (stampAmount > 0) _safeTransfer(stampWallet, stampAmount);  // Frais timbres
+        _safeTransfer(platformWallet, platformFee);      // ← SafeLand Core
+        _safeTransfer(seller, sellerNet);                // Vendeur net
     }
 }
 ```
+
+**Configuration par pays :**
+- Maroc : platformFeeBps = 10 (0.1% — exemple : 50 USD sur 50K USD)
+- Sénégal : platformFeeBps = 15 (0.15% — plus high-touch)
+- Égypte : platformFeeBps = 5 (0.05% — marché très compétitif)
+- Le pays peut modifier ou désactiver après uptake (souveraineté)
+
+**Implémentation (Q2 2026) :**
+1. Ajouter variables et init params à SafeLandEscrow.sol
+2. Modifier logique notaryComplete() pour prélever platformFee
+3. Setter admin pour ajuster platformFeeBps post-déploiement
+4. Tests complets (calculs gas, edge cases, upgrade UUPS)
+5. Documenter dans CDC du pays
 
 ### 6.2 Justification aupres du pays
 
@@ -822,92 +967,309 @@ Le module Reconstruction est directement applicable. **Financement massif dispon
 
 ---
 
-## 11. Gestion de la Propriete Intellectuelle
+## 11. Gestion de la Propriete Intellectuelle et Souverainete
 
-### 11.1 Ce que tu proteges
+**Principe clé :** SafeLand est "Template + Services". Le pays possède le code déployé et toutes les données. SafeLand Core conserve uniquement le template, l'IA, la marque, et les services SaaS.
 
-| Element | Protection | Juridiction |
-|---------|-----------|-------------|
-| Template generateur | Trade secret + copyright | Societe (Maroc ou autre) |
-| SaaS Admin | SaaS heberge, pas livre | Ton infrastructure |
-| IA anti-fraude (modele) | Trade secret | Ton infrastructure |
-| Marque "SafeLand" | Depot OMPIC + WIPO | International |
-| Documentation/CDC | Copyright | Societe |
-| Architecture multi-pays | Brevet potentiel | PCT (international) |
+### 11.1 Architectonie de propriété
 
-### 11.2 Ce que tu livres
+```
+SafeLand Core (Privé)              SafeLand [Pays] (Propriété du pays)
+├── Template (propriétaire)         ├── Code fork (100% du pays)
+├── Générateur (propriétaire)       ├── Contrats déployés (pays les contrôle)
+├── SaaS Admin (SaaS)               ├── Données on-chaîne (propriété souveraine)
+├── IA Anti-Fraude (SaaS API)       ├── Infrastructure (pays héberge)
+├── Marque + Trademarks             ├── Teams locales (emplois du pays)
+└── Brevets potentiels              └── Droits de modification (illimité)
+```
 
-| Element | Licence | Droits du pays |
-|---------|---------|---------------|
-| Code fork | Licence perpetuelle exclusive pour le territoire | Utiliser, modifier, deployer |
-| Smart contracts deployes | Propriete du pays | Upgrader, pause, modifier |
-| Donnees on-chain | Propriete souveraine du pays | Total |
-| Documentation adaptee | Licence perpetuelle | Utiliser, distribuer internement |
+### 11.2 Ce que tu proteges (IP SafeLand Core)
 
-### 11.3 Clauses contractuelles cles
+| Élément | Protection Légale | Durée |
+|---------|------------------|-------|
+| Template générateur source | Trade secret + copyright | Perpétuelle |
+| Scripts generate.js et validate-config.js | Trade secret | Perpétuelle |
+| Architecture template (design patterns) | Copyright + brevet potentiel (PCT) | 20 ans (brevet) |
+| SaaS Admin source code | Copyright | Perpétuelle |
+| IA Anti-Fraude (model + algo) | Trade secret | Perpétuelle |
+| Marque "SafeLand" | Marque déposée (WIPO + pays locaux) | 10 ans renouvelable |
+| Documentation générique (guides, best practices) | Copyright | Perpétuelle |
+| Modules source code (non livrés) | Copyright | Perpétuelle |
 
-**1. Non-concurrence territoriale**
-"Le fork est licence pour le territoire du pays uniquement.
-Le pays ne peut pas le revendre a un autre pays."
+**Stratégie :** Tout ce qui est "template" ou "SaaS" reste propriétaire. Tout ce qui est déployé au pays est livré.
 
-**2. Non-reverse-engineering du template**
-"Le pays ne peut pas reconstituer le generateur a partir du fork."
+### 11.3 Ce que tu livres au pays (Licence perpétuelle exclusive)
 
-**3. Attribution**
-"Mention obligatoire : Powered by SafeLand Technology"
+| Élément | Droits du Pays | Restrictions |
+|---------|---------------|--------------|
+| **Code fork complet** | Propriété exclusive pour le territoire. Utiliser, modifier, forker indépendamment. Embaucher développeurs pour maintenance/upgrades. | Non-concurrence : pas de revente à un autre pays (sauf accord spécial). Non-redistribution publique sans accord. |
+| **Smart contracts déployés** | Le pays contrôle les keys, les addresses, et les upgrades. Peut modifier contracts via admin roles. Peut déployer contrats additionnels. | Responsabilité sécurité : le pays audite ses propres modifications. Respect UUPS interface pour compatibilité futures mises à jour. |
+| **Données on-chaîne** | Propriété souveraine du pays, 100%. Données immutables, non réversibles. Le pays peut exporter/migrer vers autre blockchain indépendamment de SafeLand. | Aucune restriction (souveraineté maximale). |
+| **Frontend & Backend code** | Licence perpétuelle, utiliser, modifier, forker. Embarquer dans infrastructure du pays. | Non-commercial : réservé à usage gouvernemental. Pas de commercialisation sous autre marque. |
+| **Tests & Documentation** | Propriété de SafeLand, mais droit d'utilisation perpetuel pour le pays. | Le pays peut extraire, modifier, distribuer internement. |
+| **Modules optionnels achetés** | Propriété exclusive du pays pour son territoire, après achat forfaitaire. Code source fourni. | Droit d'utilisation exclusif au territoire. Non-revente. |
+| **Données de configuration (country.json)** | Propriété du pays (données, paramètres). | Le pays peut adapter, modifier, distribuer. |
 
-**4. Maintenance lie au fee**
-"Le support et les mises a jour sont conditionnes au maintien du platform fee."
+### 11.4 Ce que tu gardes (Propriétaire, jamais livré)
 
-**5. Clause d'upgrade**
-"Les upgrades majeures sont disponibles moyennant un contrat de service."
+| Élément | Raison | Business Model |
+|---------|--------|----------------|
+| **Template privé** | Actif principal pour générer nouveaux pays. Base pour R&D. | Licence à chaque nouveau pays (600K-1.7M USD) |
+| **Générateur (generate.js)** | Propriété intellectuelle clé, réduit coût déploiement. | Avantage compétitif, jamais livré. |
+| **SaaS Admin Dashboard** | Service hébergé, pas logiciel. Abonnement récurrent. | Revenue 60-300K USD/an par pays. |
+| **IA Anti-Fraude (model)** | Modèle propriétaire, coûteux à entraîner. Données d'entraînement confidentielles. | SaaS API (0.1-0.5% revenue par utilisation). |
+| **Marque "SafeLand"** | Identité globale, prestige. | Licence d'usage seulement, pas transfert propriété. |
+| **Modules source** | Vendus à prix fort (150-300K USD chacun). | Code source fourni après achat, mais restent propriétaire jusqu'à achat. |
+| **Archives de code** | Historique git, évolutions, décisions tech. | Restent confidentiels (trade secrets). |
+
+### 11.5 Clauses contractuelles clés (à inclure dans contrats pays)
+
+#### Clause 1 — Propriété et Souveraineté
+```
+Le pays devient propriétaire exclusif du code fork, des contrats déployés,
+et de toutes les données on-chaîne. Le pays peut opérer indépendamment 
+de SafeLand Core après le déploiement initial, y compris recrutement 
+développeurs locaux pour maintenance.
+
+SafeLand Core conserve propriété du template generateur, de la marque,
+et des modules source code non livrés.
+```
+
+#### Clause 2 — Non-concurrence territoriale
+```
+Le pays s'engage à ne pas :
+- Revendre, re-louer, ou relicencier le fork à un autre pays sans accord écrit
+- Utiliser le code fork pour développer produits concurrents de SafeLand 
+  pour d'autres juridictions
+
+Exceptions : Le pays peut modifier/forker pour besoins domestiques illimités.
+SafeLand n'est pas exclusif au cadastre (ex : le pays peut ajouter 
+registre successions, maritime, etc.)
+```
+
+#### Clause 3 — Attribution obligatoire
+```
+Tout système déployé doit mentionner :
+"Powered by SafeLand Technology" en footer/about pages
+URL vers safeland.tech (ou équivalent)
+
+Exceptions : Mentions internes/techniques non requises.
+```
+
+#### Clause 4 — Maintenance et Support liés au Fee
+```
+Les services inclus dans le SaaS Admin (monitoring, alertes, hotline support)
+sont conditionnés au paiement du platform fee et abonnement SaaS.
+
+Si le pays arrête paiement :
+- SaaS Admin se désactive
+- Support hotline cesse
+- Mais : code local reste du pays, blockchain immutable (inchangé)
+```
+
+#### Clause 5 — Upgrades de sécurité critiques
+```
+SafeLand Core peut proposer upgrades sécurité critiques (audit trouvé bug).
+Le pays a 30 jours pour évaluer/tester avant application forcée.
+Raison : Bug sécurité affecte écosystème global (si Appchain partagée).
+
+Upgrades non-critiques sont optionnels (le pays choisit quand upgrader).
+```
+
+#### Clause 6 — Indépendance technique
+```
+Le code fork ne dépend d'aucun service SafeLand Core pour opérer.
+Même si SafeLand Core disparaît, le pays peut continuer avec:
+- Code source complet (git clone)
+- TheGraph subgraph hebergé localement (ou via The Graph Studio)
+- Smart contracts 100% autonomes (UUPS upgradeable par pays)
+
+Aucun "killswitch" ou dépendance cloud de SafeLand Core.
+```
+
+#### Clause 7 — Data Privacy et Conformité
+```
+Le pays est responsable de conformité RGPD/GDPR/loi locale pour données.
+SafeLand ne stocke aucune donnée utilisateur (tout on-chaîne ou chez pays).
+Exceptions : Logs anonymes audit (30 jours rétention max), métriques SaaS.
+```
+
+#### Clause 8 — Responsabilité sécurité
+```
+SafeLand est responsable de sécurité code livré (template + modules).
+Après déploiement, le pays est responsable :
+- Infrastructure sécurité (serveurs, access control)
+- Gestion keys/wallets privés
+- Modifications locales au code
+- Opérations blockchain (node operations)
+
+SafeLand assist via SaaS/support, mais pas responsabilité juridique.
+```
+
+### 11.6 Scénarios d'indépendance (hypothèse : pays veut partir)
+
+**Scénario 1 : Pays arrête paiement SaaS**
+- ✅ Code local reste opérationnel
+- ✅ Blockchain reste immutable, données intactes
+- ✅ Pays peut embaucher devs locaux pour maintenance
+- ❌ Perd SaaS Admin monitoring, support hotline
+- ❌ Perd IA anti-fraude API
+- **Coût pour pays d'indépendance :** ~100K USD (1-2 devs, 6 mois setup opérations locales)
+
+**Scénario 2 : Pays fork et deploy compétiteur**
+- ✅ Légalement possible dans son territoire (code est livré)
+- ❌ Non-concurrence contractuelle l'interdit pour autres pays
+- ❌ Perte confiance bailleurs fonds / donateurs
+- **Risque pour pays :** Rupture contrats, isolement diplomatique si publicisé
+
+**Scénario 3 : SafeLand Core disparaît**
+- ✅ Pays opère indépendamment (code + smart contracts)
+- ✅ Blockchain inchangée, TheGraph subgraph migrables
+- ❌ Perte mises à jour sécurité (pays peut les faire localement)
+- ❌ Perte support (coûteux à reconstruire)
+- **Coût pour pays :** ~50-100K USD setup devops local, puis 200-300K USD/an opérations
+
+**Conclusion :** Architecture soigneusement conçue pour zéro vendor lock-in. Pays possède tout ce qui compte (code + données). SafeLand bénéficie d'être indispensable par excellence, pas obligation légale.
 
 ---
 
 ## 12. Cycle de Vie d'un Projet Pays
 
-### Phase 0 — Prospection (1-3 mois)
-```
-Identifier le pays → Contact institutionnel → Etude faisabilite → Proposition
-```
-- Cout : 20-50K USD (temps + deplacement)
-- Livrable : etude de faisabilite + proposition commerciale
+**Timeline reference :** Maroc (février 2026 — juin 2026) = 4 mois jusqu'au go-live. Exemple réaliste avec équipe 3 devs + 1 PM + legal.
 
-### Phase 1 — Contrat (1-2 mois)
-```
-Negociation → Signature → Acompte (30%)
-```
-- Livrable : contrat signe, country.json valide
+### Phase 1 — Découverte (2-4 semaines)
 
-### Phase 2 — Generation et adaptation (1-3 mois)
-```
-Generer fork → Adapter modules → Tests → Audit securite
-```
-- Livrable : projet standalone, 100% tests verts, audit passe
+**Objectif :** Valider intérêt, problématique juridique, budget disponible, timeline du ministère.
 
-### Phase 3 — Integration (2-4 mois)
-```
-Deploiement infra → Integration SI existant → Formation equipe locale
-```
-- Livrable : plateforme deployee sur l'infra du pays
+**Activités :**
+- Entretiens stakeholders clés : directeur cadastre, direction transformation numérique, ministère justice, banque centrale
+- Audit juridique local : lois foncières, écoles d'héritage, fiscalité, régulation blockchain
+- Visite infrastructures existantes (cadastre, notaires, tribunaux)
+- Validation problem-fit : "À combien revient un titre foncier aujourd'hui ? Combien de temps ?"
+- Étude faisabilité technique (complexité intégration, capacité IT local)
 
-### Phase 4 — Pilote (3-6 mois)
-```
-Pilote regional → Correction bugs → Feedback utilisateurs → Ajustements
-```
-- Livrable : pilote operationnel, retours documentes
+**Livrables :**
+- Rapport découverte (10-15 pages)
+- Proposition de valeur (2-3 pages, impact estimé)
+- Lettre d'intention (LOI) — engagement budgétaire initial
 
-### Phase 5 — Extension (6-12 mois)
-```
-Extension nationale → Formation agents → Montee en charge
-```
-- Livrable : deploiement national, SaaS Admin connecte
+**Ressources :** 1 PM + 1 expert juridique (interne) + 1 consultant local (external)
+**Coût :** 20-30K USD (consulting, déplacements, hotels)
+**Durée :** 2-4 semaines
 
-### Phase 6 — Operations (ongoing)
-```
-Support → Monitoring → Upgrades → Nouveaux modules
-```
-- Revenue recurrent : platform fee + SaaS + support + modules
+### Phase 2 — Préparation (4-8 semaines)
+
+**Objectif :** Signer contrat, constituer équipe locale, préparer infrastructure, valider approbations régulatoires.
+
+**Activités :**
+- Négociation contrats : terms, SaaS pricing, data ownership, IP clauses
+- Legal due diligence : OFAC/sanctions, data privacy (RGPD/GDPR équivalent), audit contrats
+- Infrastructure setup : serveurs (AWS/Azure ou on-prem du pays), domaines, CI/CD
+- Recrutement/désignation équipe locale : 1-2 devs pays, 1 PM local, experts métier
+- Approvals régulatoires : signature ministère digital, cadastre, justice (si requis)
+- Formation équipe : Solidity, Node.js, Next.js, processus SafeLand
+- Création country.json : taux fiscaux, écoles d'héritage, régions, modules, wallets
+
+**Livrables :**
+- Contrat signé + compte de trésorier reçu (30% de licence)
+- country.json validé et revisité juridiquement
+- Équipe locale formée, accès à repos + infra
+- Infrastructure staging opérationnelle
+- Architecture technique approuvée par pays
+
+**Ressources :** 1-2 devs (yourcore), 1 PM, 1 juriste, 1 expert terrain local
+**Coût :** 80-120K USD (recrutement local, formation, legal, infra setup)
+**Durée :** 4-8 semaines
+
+### Phase 3 — Fork et Déploiement Technique (8-12 semaines)
+
+**Objectif :** Générer fork automatisé (ou fork manuel si générateur non disponible), adapter contrats à la loi du pays, déployer sur infrastructure, passer UAT.
+
+**Activités (avec générateur Q2 2026) :**
+- Fork depuis générateur : `node scripts/generate.js --country=[pays]` (1-2 jours)
+- Adaptation contrats Solidity : vérifier taux fiscaux, écoles héritage, régions, wallets (5-10 jours)
+- Build & compile : vérifier aucune erreur (1 jour)
+- Tests unitaires : 100% passage (3-5 jours)
+- Déploiement staging : deploy contracts via UUPS proxies (2-3 jours)
+- Migration données pilote : 500-5000 titres d'exemple sur-chaîne (5-10 jours)
+- UAT avec ministère : scénarios transactionnels, succession, justice (10-15 jours)
+- Corrections bugs UAT (5-10 jours)
+- Audit sécurité externe : CertiK ou équivalent (15-20 jours, parallèle)
+
+**Livrables :**
+- Fork complet, autonome, 100% tests passants
+- Contrats déployés sur staging (adresses générées, proxies fonctionnels)
+- 5000+ titres d'exemple on-chaîne, queryables via TheGraph subgraph
+- Rapport UAT signé par ministère
+- Rapport audit sécurité (CertiK) — sans bloquants
+- Documentation technique (API docs, contract specs)
+- CDC (Cahier des Charges) adapté au pays
+
+**Ressources :** 2-3 devs core/local, 1 QA, 1 PM, expert terrain local
+**Coût :** 200-350K USD (dépend modules, complexité intégration, audit)
+**Durée :** 8-12 semaines (peut être 4-6 semaines avec générateur mature + équipe experientée)
+
+### Phase 4 — Lancement Production (1-2 semaines)
+
+**Objectif :** Migrer données réelles, activer production, assurer 0 incidents critiques, former utilisateurs à grande échelle.
+
+**Activités :**
+- Migration données réelles : export cadastre legacy → format NFT SafeLand → déploiement on-chaîne
+- Déploiement production : deploy contracts sur réseau production (Appchain pays, ou Polygon/Ethereum)
+- Cutover data : activation production, désactivation legacy (ou mode hybride)
+- Support 24/7 : équipe tech on-call durant 1-2 semaines
+- Formation utilisateurs : agents notaires, registrars, judges (10-20 personnes, 3-5 jours)
+- Monitoring go-live : dashboards alertes, logs, metrics
+- Incident response : dédié pour bugs/questions utilisateurs
+
+**Livrables :**
+- SaaS Admin connecté aux contrats production (monitoring live)
+- 100+ utilisateurs actifs jour 1
+- 0 incidents critiques dans les 2 premières semaines
+- Rapport go-live (nb transactions, performance, incidents)
+- Equipe support production formée
+
+**Ressources :** Full team (devs, ops, PM, support) — on-site si possible
+**Coût :** 30-50K USD (support intensif, personnel sur site)
+**Durée :** 1-2 semaines cutover + 2-4 semaines stabilisation post-launch
+
+### Phase 5 — Opérations et Croissance (6+ mois)
+
+**Objectif :** Atteindre adoption cible, générer revenus récurrents, planifier expansion régionale/nationale.
+
+**Activités :**
+- Support technique : bug fixes, questions utilisateurs, hotlines
+- Monitoring SaaS : KPIs business (transactions, volumes, revenue fees), uptime
+- Déploiement modules : si prévus au contrat (reconstruction, tasaluh, etc.)
+- Rollout géographique : expansion du pilote régional à national (si applicable)
+- Optimisations : performance, coûts infrastructure, UX améliorations
+- Préparation renouvellement contrat SaaS : négociation tiers montée en charge
+
+**Livrables :**
+- 100%+ adoption growth (objectif initial atteint)
+- Platform fee actif et transparent (0.1% per transaction)
+- SaaS Admin reports mensuels (avec metrics bailleurs de fonds)
+- 1-2 modules optionnels déployés (si applicable)
+- Contrat renouvellement signé pour An 2
+
+**Ressources :** 0.5 FTE PM (part-time), 0.5 FTE backend support, 0.5 FTE ops, 1-2 devs local
+**Coût :** 50K USD/an (inclus dans SaaS revenue)
+**Durée :** 6-12 mois An 1, puis récurrent
+
+---
+
+**Synthèse Timeline et Budget (exemple Sénégal, Q3 2026) :**
+
+| Phase | Durée | Équipe | Coût |
+|-------|-------|--------|------|
+| 1. Découverte | 2-4 sem | 1 PM + 1 legal | 20-30K USD |
+| 2. Préparation | 4-8 sem | 1 PM + team local | 80-120K USD |
+| 3. Fork & Tech (avec générateur) | 4-6 sem | 2-3 devs + QA | 150-250K USD |
+| 4. Go-Live | 1-2 sem | Full team on-site | 30-50K USD |
+| 5. Operations (An 1) | 6-12 mois | 0.5-2 FTE local | Inclus SaaS |
+| **TOTAL** | **4-5 mois** | **~5-8 FTE équivalent** | **280-450K USD** |
+
+**Pour Maroc (sans générateur, février-juin 2026) :** +8-12 semaines phase 3 (fork manuel). Total : 7-8 mois, ~500-700K USD.
 
 ---
 
@@ -1064,7 +1426,176 @@ Support → Monitoring → Upgrades → Nouveaux modules
 
 ---
 
-## 18. Annexes
+## 18. Strategie d'Acquisition par Pays
+
+**Objectif :** Identifier, approcher, négocier et déployer SafeLand dans 20+ pays en 3-5 ans. Cette section décrit le playbook d'acquisition et les critères de sélection.
+
+### 18.1 Criteres de Selection des Pays Cibles
+
+**Stabilité politique & gouvernance :**
+- Démocraties stables ou régimes stables depuis 10+ ans
+- Éviter zones de conflit actif (mais post-conflit OK — modules reconstruction)
+- Gouvernement numérique réformatrice (champion politique)
+- Pas de sanctions internationales (OFAC check requis)
+
+**Capacité financière :**
+- PIB per capita > 1K USD (classe moyenne émergente)
+- Gouvernement peut investir 600K-1.7M USD (budget foncier/cadastre/numérique)
+- Ou accès à financements donateurs (Banque Mondiale, AFD, USAID, etc.)
+
+**Volonté politique & réforme :**
+- Champion ministériel identifié (cadastre, justice, numérique)
+- Stratégie numérique nationale (pour justifier investissement)
+- Problème foncier reconnu (titres informels, fraudes, successions complexes)
+- Timeline réaliste : pas de "c'est bon pour dans 5 ans"
+
+**Complexité juridique :**
+- Écoles d'héritage islamiques (malékite, hanafite, chaféite, hanbalite) — bonne fit SafeLand
+- Ou systèmes coutumiers africains documentés — modules future
+- Pas de systèmes hybrides exotiques (trop cher à adapter)
+- Droit foncier écrit et accessible en anglais/français
+
+**Taille marché :**
+- Minimum 5M population (volume transactions viables)
+- Optimal 20M+ population (scale rapide)
+- Secteur immobilier informel > 50% (forte demande digitalisation)
+
+### 18.2 Matrice Pays Cibles (Priorité Roadmap 2026-2027)
+
+| Pays | Stabilité | Financement | Champion | Complexité | Population | Priorité | Target |
+|------|-----------|-------------|----------|-----------|-----------|----------|--------|
+| **Maroc** | ✅ Stable | ✅ Gov | ✅ ANCFCC | Moyen | 37M | **P0** | ✅ Go-live juin 2026 |
+| **Sénégal** | ✅ Stable | ✅ BM | TBD | Moyen | 18M | **P1** | Q3 2026 |
+| **Égypte** | ✅ Stable | ✅ Gov/BM | TBD | Moyen | 105M | **P1** | Q3-Q4 2026 |
+| **Jordanie** | ✅ Stable | ✅ BM/UE | TBD | Moyen | 10M | **P1** | Q4 2026 |
+| **Tunisie** | ✅ Stable | ⚠️ Budget limité | TBD | Moyen | 12M | **P1** | Q4 2026-Q1 2027 |
+| **Bénin** | ✅ Stable | ✅ AFD/BM | TBD | Moyen | 13M | **P1** | Q1 2027 |
+| **Kenya** | ✅ Stable | ✅ IFC/Gov | TBD | Faible | 54M | **P1** | Q2 2027 |
+| **Liban** | ⚠️ Instable | ❌ Crise | TBD | Haut | 5M | **P2** | Q3 2027 (si stabilité) |
+| **Syrie** | ❌ Conflit | ✅ UN/UNRWA | TBD | Haut | 18M | **P2** | Post-reconstruction (2027+) |
+| **Irak** | ⚠️ Instable | ✅ Gov/BM | TBD | Haut | 43M | **P2** | Q4 2027 (post-stabilité) |
+| **Ukraine** | ⚠️ Conflit | ✅ UE/USAID | TBD | Moyen | 38M | **P2** | 2027+ (si paix) |
+| **RDC** | ⚠️ Fragile | ✅ BM/UN | TBD | Haut | 99M | **P2** | 2028+ (renforcement) |
+| **Nigeria** | ✅ Stable | ✅ Gov | TBD | Haut | 223M | **P2** | 2027-2028 |
+| **Rwanda** | ✅ Très stable | ✅ Gov | TBD | Moyen | 14M | **P1** | 2027 |
+| **Inde** | ✅ Stable | ✅ Gov | TBD | Très haut | 1.4B | **P3** | 2028+ (phase 2 produit) |
+
+**Légende :** 
+- P0 = Référence (en cours)
+- P1 = Haute priorité (18-24 mois)
+- P2 = Moyen terme (24-36 mois)
+- P3 = Long terme / exploration
+
+### 18.3 Playbook d'Acquisition (6 mois par pays)
+
+**MOIS 1-2 : DÉCOUVRIR & PITCHER**
+
+Objectif : Valider fit, identifier champion, obtenir réunion C-level.
+
+Actions :
+1. Recherche desk : legal landscape, cadastre situation, digital strategy gouvernement
+2. Identification contacts : via embassy, donateurs (BM, AFD), telecoms, ONG locales
+3. Outreach : email + call au directeur cadastre / CIO gouvernement
+4. Pitch 2 pages : "SafeLand solves your problem : X% titres informels → blockchain 6 mois"
+5. Appel découverte (30-45 min) : valider urgence, budget, timeline
+6. Visite sur place (1 semaine) si fit confirmé : rencontres ministère, notaires, banks
+
+KPI : LOI (Letter of Intent) engageant budget discussion
+
+**MOIS 3 : NÉGOCIER & COMMIT**
+
+Objectif : Contrat signé, 30% acompte reçu.
+
+Actions :
+1. Formule offre commerciale : modules requis, timeline, SaaS pricing
+2. Négociation : termes data, IP, platform fee %, durée contrat, options renouvellement
+3. Legal review : contrat par avocat local + international, OFAC check
+4. Partenaires locaux : si nécessaire (intégrateur, telco, ministry IT vendor) pour crédibilité
+5. Signature : contrat bilangue + acompte 30% versé
+
+KPI : Contrat signé, 200-300K USD (30%) reçu
+
+**MOIS 4-5 : MOBILISER**
+
+Objectif : Équipe locale formée, country.json validé, infra ready.
+
+Actions :
+1. Recruitment / désignation équipe locale : 1-2 devs, 1 PM, experts métier
+2. Infrastructure : AWS/Azure/on-prem setup, VPN, CI/CD, repos Git
+3. Legal research : audit droit foncier, succession, fiscalité, blockchain compliance
+4. Country.json draft : taux, écoles, régions, modules décidés, wallets
+5. Formation équipe : Solidity, Node.js, Next.js workshops (1-2 semaines)
+6. Regulatory approvals : signature ministère digital sur technical roadmap
+
+KPI : Country.json validé, équipe formée, infra opérationnelle
+
+**MOIS 6 : FORK & PILOTE RAPIDE**
+
+Objectif : Fork généré/adapté, 500 titres d'exemple on-chaîne, UAT ministère passé.
+
+Actions :
+1. Si générateur disponible (Q2 2026+) : `node scripts/generate.js --country=[pays]` (2-3 jours)
+2. Sinon (avant Q2) : fork manuel de Maroc, adaptation manuelle (2-4 semaines)
+3. Adaptation modules : vérification taux, écoles, régions
+4. Tests + compile : 100% verts
+5. Migration données : 500-1000 titres d'exemple on-chaîne (testnet ou staging)
+6. UAT avec ministère : 5-10 scénarios réels (vente, succession, actions justice)
+7. Audit sécurité externe : lancé en parallèle (CertiK, Trail of Bits)
+
+KPI : Fork 100% testé, UAT signé, audit sécurité rapporté
+
+### 18.4 Qui Approche Quoi ?
+
+**Votre équipe (SafeLand Core) :**
+- Maroc (référence) : vous + équipe local complète
+- Sénégal (prise après générateur) : PM + 1 dev yourcore + équipe local
+- Égypte (stratégique, gros marché) : PM + CTO + équipe local
+- Autres P1 : PM + dev généraliste
+
+**Partenaires locaux / Intégrateurs :**
+- Pays 4+ : consultants locaux prennent lead acquisition + coordination
+- Vous apportez : template, générateur, expertise contrats, audit
+- Partenaire apporte : crédibilité locale, connexions ministériel, équipe local
+- Modèle : partenaire reçoit 10-15% revenue année 1 pour acquisition
+
+**Donateurs / Institutions :**
+- Vous : contactez BM, AFD, USAID avant partenaire local
+- Pitch : "blockchain cadastre = impact foncier + financement numerique"
+- Donateurs apportent : 50-80% budget pais, crédit gouvernement
+- Vous apportez : technologie, déploiement rapide
+
+### 18.5 Budget Acquisition par Pays
+
+| Activité | Coût | Timing |
+|----------|------|--------|
+| Découverte (desk + visite 1 sem) | 15-25K USD | Mois 1-2 |
+| Négociation + legal (avocat local) | 15-20K USD | Mois 3 |
+| PM temps (4-6 mois) | 30-50K USD | Mois 1-6 |
+| Formation équipe local (2-3 sem) | 10-15K USD | Mois 4 |
+| Infrastructure setup (1-3 mois) | 5-10K USD | Mois 4-6 |
+| Consultant local (audit foncier, etc.) | 20-30K USD | Mois 2-5 |
+| **Total acquisition (sans développement)** | **95-150K USD** | **6 mois** |
+
+**Note :** Coût développement (fork, UAT, modules) est facturé dans licence initiale 600K-1.7M. Acquisition cost 95-150K est opex.
+
+### 18.6 Timeline Acquisition (12-24 mois pour 5 pays)
+
+```
+2026 Q2  : Maroc go-live (référence) ✅
+2026 Q3  : Sénégal + Égypte pitch/découverte
+2026 Q4  : Sénégal + Égypte contrats signés, fork lancé
+2027 Q1  : Sénégal + Égypte go-live
+2027 Q2  : Jordanie + Tunisie + Bénin en découverte
+2027 Q3  : Jordanie + Tunisie contrats, Bénin en pitch
+2027 Q4  : Jordanie + Tunisie + Bénin go-live (si on schedule)
+2027 Q1+ : Kenya + Rwanda + Nigeria en parallèle
+```
+
+**Hypothèse :** 3 pays en parallèle max (ressources contraintes). Avec générateur Q2, timeline accélère.
+
+---
+
+## 19. Annexes
 
 ### A. Checklist nouveau pays
 
